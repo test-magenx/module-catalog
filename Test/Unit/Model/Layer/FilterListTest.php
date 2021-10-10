@@ -52,7 +52,7 @@ class FilterListTest extends TestCase
     private $layerCategoryConfigMock;
 
     /**
-     * @inheritDoc
+     * Set Up
      */
     protected function setUp(): void
     {
@@ -65,7 +65,7 @@ class FilterListTest extends TestCase
             FilterList::CATEGORY_FILTER => 'CategoryFilterClass',
             FilterList::PRICE_FILTER => 'PriceFilterClass',
             FilterList::DECIMAL_FILTER => 'DecimalFilterClass',
-            FilterList::ATTRIBUTE_FILTER => 'AttributeFilterClass'
+            FilterList::ATTRIBUTE_FILTER => 'AttributeFilterClass',
 
         ];
         $this->layerMock = $this->createMock(Layer::class);
@@ -81,30 +81,26 @@ class FilterListTest extends TestCase
 
     /**
      * @param string $method
-     * @param string|null $value
+     * @param string $value
      * @param string $expectedClass
-     *
-     * @return void
      * @dataProvider getFiltersDataProvider
+     *
      * @covers \Magento\Catalog\Model\Layer\FilterList::getFilters
      * @covers \Magento\Catalog\Model\Layer\FilterList::createAttributeFilter
      * @covers \Magento\Catalog\Model\Layer\FilterList::__construct
      */
-    public function testGetFilters(string $method, ?string $value, string $expectedClass): void
+    public function testGetFilters($method, $value, $expectedClass)
     {
-        $this->objectManagerMock
+        $this->objectManagerMock->expects($this->at(0))
             ->method('create')
-            ->withConsecutive(
-                [],
-                [
-                    $expectedClass,
-                    [
-                        'data' => ['attribute_model' => $this->attributeMock],
-                        'layer' => $this->layerMock
-                    ]
-                ]
-            )
-            ->willReturnOnConsecutiveCalls('filter', 'filter');
+            ->willReturn('filter');
+
+        $this->objectManagerMock->expects($this->at(1))
+            ->method('create')
+            ->with($expectedClass, [
+                'data' => ['attribute_model' => $this->attributeMock],
+                'layer' => $this->layerMock])
+            ->willReturn('filter');
 
         $this->attributeMock->expects($this->once())
             ->method($method)
@@ -122,15 +118,16 @@ class FilterListTest extends TestCase
     }
 
     /**
-     * Test filters list result when category should not be included.
+     * Test filters list result when category should not be included
      *
      * @param string $method
      * @param string $value
      * @param string $expectedClass
      * @param array $expectedResult
      *
-     * @return void
      * @dataProvider getFiltersWithoutCategoryDataProvider
+     *
+     * @return void
      */
     public function testGetFiltersWithoutCategoryFilter(
         string $method,
@@ -138,7 +135,7 @@ class FilterListTest extends TestCase
         string $expectedClass,
         array $expectedResult
     ): void {
-        $this->objectManagerMock
+        $this->objectManagerMock->expects($this->at(0))
             ->method('create')
             ->with(
                 $expectedClass,
@@ -167,29 +164,29 @@ class FilterListTest extends TestCase
     /**
      * @return array
      */
-    public function getFiltersDataProvider(): array
+    public function getFiltersDataProvider()
     {
         return [
             [
                 'method' => 'getAttributeCode',
                 'value' => FilterList::PRICE_FILTER,
-                'expectedClass' => 'PriceFilterClass'
+                'expectedClass' => 'PriceFilterClass',
             ],
             [
                 'method' => 'getBackendType',
                 'value' => FilterList::DECIMAL_FILTER,
-                'expectedClass' => 'DecimalFilterClass'
+                'expectedClass' => 'DecimalFilterClass',
             ],
             [
                 'method' => 'getAttributeCode',
                 'value' => null,
-                'expectedClass' => 'AttributeFilterClass'
+                'expectedClass' => 'AttributeFilterClass',
             ]
         ];
     }
 
     /**
-     * Provides attribute filters without category item.
+     * Provides attribute filters without category item
      *
      * @return array
      */

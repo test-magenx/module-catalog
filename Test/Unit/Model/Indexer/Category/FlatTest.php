@@ -52,9 +52,6 @@ class FlatTest extends TestCase
      */
     protected $cacheContextMock;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->fullMock = $this->createPartialMock(
@@ -98,10 +95,7 @@ class FlatTest extends TestCase
         $cacheContextProperty->setValue($this->model, $this->cacheContextMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteWithIndexerInvalid(): void
+    public function testExecuteWithIndexerInvalid()
     {
         $this->indexerMock->expects($this->once())->method('isInvalid')->willReturn(true);
         $this->prepareIndexer();
@@ -111,10 +105,7 @@ class FlatTest extends TestCase
         $this->model->execute([1, 2, 3]);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteWithIndexerWorking(): void
+    public function testExecuteWithIndexerWorking()
     {
         $ids = [1, 2, 3];
 
@@ -126,10 +117,8 @@ class FlatTest extends TestCase
             Rows::class,
             ['reindex']
         );
-        $rowMock
-            ->method('reindex')
-            ->withConsecutive([$ids, true], [$ids, false])
-            ->willReturnOnConsecutiveCalls($rowMock, $rowMock);
+        $rowMock->expects($this->at(0))->method('reindex')->with($ids, true)->willReturnSelf();
+        $rowMock->expects($this->at(1))->method('reindex')->with($ids, false)->willReturnSelf();
 
         $this->rowsMock->expects($this->once())->method('create')->willReturn($rowMock);
 
@@ -140,10 +129,7 @@ class FlatTest extends TestCase
         $this->model->execute($ids);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteWithIndexerNotWorking(): void
+    public function testExecuteWithIndexerNotWorking()
     {
         $ids = [1, 2, 3];
 
@@ -166,10 +152,7 @@ class FlatTest extends TestCase
         $this->model->execute($ids);
     }
 
-    /**
-     * @return void
-     */
-    protected function prepareIndexer(): void
+    protected function prepareIndexer()
     {
         $this->indexerRegistryMock->expects($this->once())
             ->method('get')
@@ -177,10 +160,7 @@ class FlatTest extends TestCase
             ->willReturn($this->indexerMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteFull(): void
+    public function testExecuteFull()
     {
         /** @var Full $categoryIndexerFlatFull */
         $categoryIndexerFlatFull = $this->createMock(Full::class);

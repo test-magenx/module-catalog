@@ -128,7 +128,7 @@ class ViewTest extends TestCase
     protected $pageConfig;
 
     /**
-     * @inheritDoc
+     * Set up instances and mock objects
      */
     protected function setUp(): void
     {
@@ -149,15 +149,7 @@ class ViewTest extends TestCase
         $this->pageConfig->expects($this->any())->method('addBodyClass')->willReturnSelf();
 
         $this->page = $this->getMockBuilder(Page::class)
-            ->onlyMethods(
-                [
-                    'getConfig',
-                    'initLayout',
-                    'addPageLayoutHandles',
-                    'getLayout',
-                    'addUpdate'
-                ]
-            )
+            ->setMethods(['getConfig', 'initLayout', 'addPageLayoutHandles', 'getLayout', 'addUpdate'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->page->expects($this->any())->method('getConfig')->willReturn($this->pageConfig);
@@ -192,7 +184,7 @@ class ViewTest extends TestCase
 
         $resultPageFactory = $this->getMockBuilder(PageFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
         $resultPageFactory->expects($this->atLeastOnce())
             ->method('create')
@@ -212,12 +204,10 @@ class ViewTest extends TestCase
     }
 
     /**
-     * Apply custom layout update is correct.
+     * Apply custom layout update is correct
      *
-     * @param array $expectedData
-     *
-     * @return void
      * @dataProvider getInvocationData
+     * @return void
      */
     public function testApplyCustomLayoutUpdate(array $expectedData): void
     {
@@ -240,11 +230,12 @@ class ViewTest extends TestCase
             ->addMethods(['getPageLayout', 'getLayoutUpdates'])
             ->disableOriginalConstructor()
             ->getMock();
-        $this->category
+        $this->category->expects($this->at(1))
             ->method('hasChildren')
-            ->willReturnOnConsecutiveCalls(
-                $expectedData[1][0]['type'] === 'default'
-            );
+            ->willReturn(true);
+        $this->category->expects($this->at(2))
+            ->method('hasChildren')
+            ->willReturn($expectedData[1][0]['type'] === 'default' ? true : false);
         $this->category->expects($this->once())
             ->method('getDisplayMode')
             ->willReturn($expectedData[2][0]['displaymode']);
@@ -257,22 +248,21 @@ class ViewTest extends TestCase
     }
 
     /**
-     * Expected invocation for Layout Handles.
+     * Expected invocation for Layout Handles
      *
      * @param array $data
-     *
      * @return void
      */
-    private function expectationForPageLayoutHandles(array $data): void
+    private function expectationForPageLayoutHandles($data): void
     {
-        $withArgs = [];
+        $index = 1;
 
         foreach ($data as $expectedData) {
-            $withArgs[] = [$expectedData[0], $expectedData[1], $expectedData[2]];
+            $this->page->expects($this->at($index))
+                ->method('addPageLayoutHandles')
+                ->with($expectedData[0], $expectedData[1], $expectedData[2]);
+            $index++;
         }
-        $this->page
-            ->method('addPageLayoutHandles')
-            ->withConsecutive(...$withArgs);
     }
 
     /**

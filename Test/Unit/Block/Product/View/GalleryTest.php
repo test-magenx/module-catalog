@@ -69,14 +69,9 @@ class GalleryTest extends TestCase
      */
     protected $galleryImagesConfigMock;
 
-    /**
-     * @var  UrlBuilder|MockObject
-     */
+    /** @var  UrlBuilder|MockObject */
     private $urlBuilder;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->registry = $this->createMock(Registry::class);
@@ -100,10 +95,7 @@ class GalleryTest extends TestCase
         ]);
     }
 
-    /**
-     * @return void
-     */
-    public function testGetGalleryImagesJsonWithLabel(): void
+    public function testGetGalleryImagesJsonWithLabel()
     {
         $this->prepareGetGalleryImagesJsonMocks();
         $json = $this->model->getGalleryImagesJson();
@@ -118,10 +110,7 @@ class GalleryTest extends TestCase
         $this->assertEquals('test_video_url', $decodedJson[0]['videoUrl']);
     }
 
-    /**
-     * @return void
-     */
-    public function testGetGalleryImagesJsonWithoutLabel(): void
+    public function testGetGalleryImagesJsonWithoutLabel()
     {
         $this->prepareGetGalleryImagesJsonMocks(false);
         $json = $this->model->getGalleryImagesJson();
@@ -129,10 +118,7 @@ class GalleryTest extends TestCase
         $this->assertEquals('test_product_name', $decodedJson[0]['caption']);
     }
 
-    /**
-     * @return void
-     */
-    private function prepareGetGalleryImagesJsonMocks($hasLabel = true): void
+    private function prepareGetGalleryImagesJsonMocks($hasLabel = true)
     {
         $storeMock = $this->getMockBuilder(Store::class)
             ->disableOriginalConstructor()
@@ -166,7 +152,7 @@ class GalleryTest extends TestCase
             ->willReturn($productMock);
 
         $this->imageHelper = $this->getMockBuilder(Image::class)
-            ->onlyMethods(['init', 'setImageFile', 'getUrl'])
+            ->setMethods(['init', 'setImageFile', 'getUrl'])
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -182,23 +168,22 @@ class GalleryTest extends TestCase
             ->method('setImageFile')
             ->with('test_file')
             ->willReturnSelf();
-        $this->urlBuilder
+        $this->urlBuilder->expects($this->at(0))
             ->method('getUrl')
-            ->willReturnOnConsecutiveCalls(
-                'product_page_image_small_url',
-                'product_page_image_medium_url',
-                'product_page_image_large_url'
-            );
+            ->willReturn('product_page_image_small_url');
+        $this->urlBuilder->expects($this->at(1))
+            ->method('getUrl')
+            ->willReturn('product_page_image_medium_url');
+        $this->urlBuilder->expects($this->at(2))
+            ->method('getUrl')
+            ->willReturn('product_page_image_large_url');
 
         $this->galleryImagesConfigMock->expects($this->exactly(2))
             ->method('getItems')
             ->willReturn($this->getGalleryImagesConfigItems());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetGalleryImages(): void
+    public function testGetGalleryImages()
     {
         $productMock = $this->createMock(Product::class);
         $productTypeMock = $this->createMock(AbstractType::class);
@@ -231,7 +216,7 @@ class GalleryTest extends TestCase
      *
      * @return ImagesConfigFactoryInterface
      */
-    private function getImagesConfigFactory(): ImagesConfigFactoryInterface
+    private function getImagesConfigFactory()
     {
         $this->galleryImagesConfigMock = $this->createConfiguredMock(
             Collection::class,
@@ -250,7 +235,7 @@ class GalleryTest extends TestCase
      *
      * @return array
      */
-    private function getGalleryImagesConfigItems(): array
+    private function getGalleryImagesConfigItems()
     {
         return  [
             new DataObject([
@@ -272,9 +257,9 @@ class GalleryTest extends TestCase
     }
 
     /**
-     * @return Collection
+     * @return \Magento\Framework\Data\Collection
      */
-    private function getImagesCollectionWithPopulatedDataObject($hasLabel): Collection
+    private function getImagesCollectionWithPopulatedDataObject($hasLabel)
     {
         $collectionMock = $this->getMockBuilder(Collection::class)
             ->disableOriginalConstructor()

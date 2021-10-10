@@ -46,7 +46,7 @@ class ReadHandlerTest extends TestCase
     {
         $this->categoryLinkFactory = $this->getMockBuilder(CategoryLinkInterfaceFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
         $this->productCategoryLink = $this->getMockBuilder(CategoryLink::class)
             ->disableOriginalConstructor()
@@ -62,10 +62,7 @@ class ReadHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testExecute(): void
+    public function testExecute()
     {
         $categoryLinks = [
             ['category_id' => 3, 'position' => 10],
@@ -73,28 +70,25 @@ class ReadHandlerTest extends TestCase
         ];
 
         $dtoCategoryLinks = [];
-        $dataObjHelperWithArgs = $categoryLinkFactoryWillReturnArgs = [];
-
         foreach ($categoryLinks as $key => $categoryLink) {
-            $dtoCategoryLinks[$key] = $this->getMockBuilder(CategoryLinkInterface::class)->getMockForAbstractClass();
-            $dataObjHelperWithArgs[] = [$dtoCategoryLinks[$key], $categoryLink, CategoryLinkInterface::class];
-            $categoryLinkFactoryWillReturnArgs[] = $dtoCategoryLinks[$key];
+            $dtoCategoryLinks[$key] = $this->getMockBuilder(CategoryLinkInterface::class)
+                ->getMockForAbstractClass();
+            $this->dataObjectHelper->expects(static::at($key))
+                ->method('populateWithArray')
+                ->with($dtoCategoryLinks[$key], $categoryLink, CategoryLinkInterface::class);
+            $this->categoryLinkFactory->expects(static::at($key))
+                ->method('create')
+                ->willReturn($dtoCategoryLinks[$key]);
         }
-        $this->dataObjectHelper
-            ->method('populateWithArray')
-            ->withConsecutive(...$dataObjHelperWithArgs);
-        $this->categoryLinkFactory
-            ->method('create')
-            ->willReturnOnConsecutiveCalls(...$categoryLinkFactoryWillReturnArgs);
 
         $product = $this->getMockBuilder(Product::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getExtensionAttributes', 'setExtensionAttributes'])
+            ->setMethods(['getExtensionAttributes', 'setExtensionAttributes'])
             ->getMock();
 
         $extensionAttributes = $this->getMockBuilder(ProductExtensionInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['setCategoryLinks'])
+            ->setMethods(['setCategoryLinks'])
             ->getMockForAbstractClass();
         $extensionAttributes->expects(static::once())->method('setCategoryLinks')->with($dtoCategoryLinks);
 
@@ -115,19 +109,16 @@ class ReadHandlerTest extends TestCase
         static::assertSame($product, $entity);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteNullExtensionAttributes(): void
+    public function testExecuteNullExtensionAttributes()
     {
         $product = $this->getMockBuilder(Product::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getExtensionAttributes', 'setExtensionAttributes'])
+            ->setMethods(['getExtensionAttributes', 'setExtensionAttributes'])
             ->getMock();
 
         $extensionAttributes = $this->getMockBuilder(ProductExtensionInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['setCategoryLinks'])
+            ->setMethods(['setCategoryLinks'])
             ->getMockForAbstractClass();
         $extensionAttributes->expects(static::once())->method('setCategoryLinks')->with(null);
 

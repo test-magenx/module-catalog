@@ -55,7 +55,7 @@ class GalleryManagementTest extends TestCase
     protected $attributeValueMock;
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
     protected function setUp(): void
     {
@@ -71,7 +71,7 @@ class GalleryManagementTest extends TestCase
                 'getCustomAttribute',
                 'getMediaGalleryEntries',
                 'setMediaGalleryEntries',
-                'getMediaAttributes'
+                'getMediaAttributes',
             ]
         );
         $this->mediaGalleryEntryMock =
@@ -85,10 +85,7 @@ class GalleryManagementTest extends TestCase
             ->getMock();
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateWithInvalidImageException(): void
+    public function testCreateWithInvalidImageException()
     {
         $this->expectException('Magento\Framework\Exception\InputException');
         $this->expectExceptionMessage('The image content is invalid. Verify the content and try again.');
@@ -103,10 +100,7 @@ class GalleryManagementTest extends TestCase
         $this->model->create("sku", $this->mediaGalleryEntryMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testCreateWithCannotSaveException(): void
+    public function testCreateWithCannotSaveException()
     {
         $this->expectException('Magento\Framework\Exception\StateException');
         $this->expectExceptionMessage('The product can\'t be saved.');
@@ -135,10 +129,7 @@ class GalleryManagementTest extends TestCase
         $this->model->create($productSku, $this->mediaGalleryEntryMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testCreate(): void
+    public function testCreate()
     {
         $productSku = 'mediaProduct';
         $entryContentMock = $this->createMock(
@@ -162,19 +153,15 @@ class GalleryManagementTest extends TestCase
 
         $newEntryMock = $this->getMockForAbstractClass(ProductAttributeMediaGalleryEntryInterface::class);
         $newEntryMock->expects($this->exactly(2))->method('getId')->willReturn(42);
-        $this->productMock
-            ->method('getMediaGalleryEntries')
-            ->willReturnOnConsecutiveCalls([], [$newEntryMock]);
+        $this->productMock->expects($this->at(2))->method('getMediaGalleryEntries')
+            ->willReturn([$newEntryMock]);
         $this->productMock->expects($this->once())->method('setMediaGalleryEntries')
             ->with([$this->mediaGalleryEntryMock]);
 
         $this->assertEquals(42, $this->model->create($productSku, $this->mediaGalleryEntryMock));
     }
 
-    /**
-     * @return void
-     */
-    public function testUpdateWithNonExistingImage(): void
+    public function testUpdateWithNonExistingImage()
     {
         $this->expectException('Magento\Framework\Exception\NoSuchEntityException');
         $this->expectExceptionMessage('No image with the provided ID was found. Verify the ID and try again.');
@@ -195,10 +182,7 @@ class GalleryManagementTest extends TestCase
         $this->model->update($productSku, $entryMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testUpdateWithCannotSaveException(): void
+    public function testUpdateWithCannotSaveException()
     {
         $this->expectException('Magento\Framework\Exception\StateException');
         $this->expectExceptionMessage('The product can\'t be saved.');
@@ -226,7 +210,7 @@ class GalleryManagementTest extends TestCase
      *
      * @return void
      */
-    public function testUpdate(): void
+    public function testUpdate()
     {
         $productSku = 'testProduct';
         $entryMock = $this->getMockForAbstractClass(ProductAttributeMediaGalleryEntryInterface::class);
@@ -261,10 +245,7 @@ class GalleryManagementTest extends TestCase
         $this->assertTrue($this->model->update($productSku, $entryMock));
     }
 
-    /**
-     * @return void
-     */
-    public function testRemoveWithNonExistingImage(): void
+    public function testRemoveWithNonExistingImage()
     {
         $this->expectException('Magento\Framework\Exception\NoSuchEntityException');
         $this->expectExceptionMessage('No image with the provided ID was found. Verify the ID and try again.');
@@ -281,10 +262,7 @@ class GalleryManagementTest extends TestCase
         $this->model->remove($productSku, $entryId);
     }
 
-    /**
-     * @return void
-     */
-    public function testRemove(): void
+    public function testRemove()
     {
         $productSku = 'testProduct';
         $entryId = 42;
@@ -302,10 +280,7 @@ class GalleryManagementTest extends TestCase
         $this->assertTrue($this->model->remove($productSku, $entryId));
     }
 
-    /**
-     * @return void
-     */
-    public function testGetWithNonExistingProduct(): void
+    public function testGetWithNonExistingProduct()
     {
         $this->expectException('Magento\Framework\Exception\NoSuchEntityException');
         $this->expectExceptionMessage('The product doesn\'t exist. Verify and try again.');
@@ -316,10 +291,7 @@ class GalleryManagementTest extends TestCase
         $this->model->get($productSku, $imageId);
     }
 
-    /**
-     * @return void
-     */
-    public function testGetWithNonExistingImage(): void
+    public function testGetWithNonExistingImage()
     {
         $this->expectException('Magento\Framework\Exception\NoSuchEntityException');
         $this->expectExceptionMessage('The image doesn\'t exist. Verify and try again.');
@@ -336,10 +308,7 @@ class GalleryManagementTest extends TestCase
         $this->model->get($productSku, $imageId);
     }
 
-    /**
-     * @return void
-     */
-    public function testGet(): void
+    public function testGet()
     {
         $productSku = 'testProduct';
         $imageId = 42;
@@ -354,10 +323,7 @@ class GalleryManagementTest extends TestCase
         $this->assertEquals($existingEntryMock, $this->model->get($productSku, $imageId));
     }
 
-    /**
-     * @return void
-     */
-    public function testGetList(): void
+    public function testGetList()
     {
         $productSku = 'testProductSku';
         $this->productRepositoryMock->expects($this->once())->method('get')->with($productSku)

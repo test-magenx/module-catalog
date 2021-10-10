@@ -64,30 +64,30 @@ class SaveHandlerTest extends TestCase
     private $tierPriceResource;
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
     protected function setUp(): void
     {
         $this->objectManager = new ObjectManager($this);
         $this->storeManager = $this->getMockBuilder(StoreManagerInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getStore'])
+            ->setMethods(['getStore'])
             ->getMockForAbstractClass();
         $this->attributeRepository = $this->getMockBuilder(ProductAttributeRepositoryInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['get'])
+            ->setMethods(['get'])
             ->getMockForAbstractClass();
         $this->groupManagement = $this->getMockBuilder(GroupManagementInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getAllCustomersGroup'])
+            ->setMethods(['getAllCustomersGroup'])
             ->getMockForAbstractClass();
         $this->metadataPoll = $this->getMockBuilder(MetadataPool::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getMetadata'])
+            ->setMethods(['getMetadata'])
             ->getMock();
         $this->tierPriceResource = $this->getMockBuilder(Tierprice::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['savePriceData', 'loadPriceData'])
+            ->setMethods([])
             ->getMock();
 
         $this->saveHandler = $this->objectManager->getObject(
@@ -102,9 +102,6 @@ class SaveHandlerTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function testExecute(): void
     {
         $tierPrices = [
@@ -117,7 +114,7 @@ class SaveHandlerTest extends TestCase
         /** @var MockObject $product */
         $product = $this->getMockBuilder(ProductInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getData', 'setData', 'getStoreId'])
+            ->setMethods(['getData','setData', 'getStoreId'])
             ->getMockForAbstractClass();
         $product->expects($this->atLeastOnce())->method('getData')->willReturnMap(
             [
@@ -129,14 +126,14 @@ class SaveHandlerTest extends TestCase
         $product->expects($this->atLeastOnce())->method('setData')->with('tier_price_changed', 1);
         $store = $this->getMockBuilder(StoreInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getWebsiteId'])
+            ->setMethods(['getWebsiteId'])
             ->getMockForAbstractClass();
         $store->expects($this->atLeastOnce())->method('getWebsiteId')->willReturn(0);
         $this->storeManager->expects($this->atLeastOnce())->method('getStore')->willReturn($store);
         /** @var MockObject $attribute */
         $attribute = $this->getMockBuilder(ProductAttributeInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getName', 'isScopeGlobal'])
+            ->setMethods(['getName', 'isScopeGlobal'])
             ->getMockForAbstractClass();
         $attribute->expects($this->atLeastOnce())->method('getName')->willReturn('tier_price');
         $attribute->expects($this->atLeastOnce())->method('isScopeGlobal')->willReturn(true);
@@ -144,7 +141,7 @@ class SaveHandlerTest extends TestCase
             ->willReturn($attribute);
         $productMetadata = $this->getMockBuilder(EntityMetadataInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getLinkField'])
+            ->setMethods(['getLinkField'])
             ->getMockForAbstractClass();
         $productMetadata->expects($this->atLeastOnce())->method('getLinkField')->willReturn($linkField);
         $this->metadataPoll->expects($this->atLeastOnce())->method('getMetadata')
@@ -152,7 +149,7 @@ class SaveHandlerTest extends TestCase
             ->willReturn($productMetadata);
         $customerGroup = $this->getMockBuilder(GroupInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId'])
+            ->setMethods(['getId'])
             ->getMockForAbstractClass();
         $customerGroup->expects($this->atLeastOnce())->method('getId')->willReturn(3200);
         $this->groupManagement->expects($this->atLeastOnce())->method('getAllCustomersGroup')
@@ -162,9 +159,6 @@ class SaveHandlerTest extends TestCase
         $this->assertEquals($product, $this->saveHandler->execute($product));
     }
 
-    /**
-     * @return void
-     */
     public function testExecuteWithException(): void
     {
         $this->expectException('Magento\Framework\Exception\InputException');
@@ -172,7 +166,7 @@ class SaveHandlerTest extends TestCase
         /** @var MockObject $attribute */
         $attribute = $this->getMockBuilder(ProductAttributeInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getName', 'isScopeGlobal'])
+            ->setMethods(['getName', 'isScopeGlobal'])
             ->getMockForAbstractClass();
         $attribute->expects($this->atLeastOnce())->method('getName')->willReturn('tier_price');
         $this->attributeRepository->expects($this->atLeastOnce())->method('get')->with('tier_price')
@@ -180,7 +174,7 @@ class SaveHandlerTest extends TestCase
         /** @var MockObject $product */
         $product = $this->getMockBuilder(ProductInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getData', 'setData', 'getStoreId', 'getOrigData'])
+            ->setMethods(['getData','setData', 'getStoreId', 'getOrigData'])
             ->getMockForAbstractClass();
         $product->expects($this->atLeastOnce())->method('getData')->with('tier_price')->willReturn(1);
 
@@ -188,25 +182,20 @@ class SaveHandlerTest extends TestCase
     }
 
     /**
-     * @param array $tierPrices
-     * @param array $tierPricesStored
-     * @param array $tierPricesExpected
-     *
-     * @return void
+     * @param $tierPrices
+     * @param $tierPricesStored
+     * @param $tierPricesExpected
      * @dataProvider executeWithWebsitePriceDataProvider
      */
-    public function testExecuteWithWebsitePrice(
-        array $tierPrices,
-        array $tierPricesStored,
-        array $tierPricesExpected
-    ): void {
+    public function testExecuteWithWebsitePrice($tierPrices, $tierPricesStored, $tierPricesExpected): void
+    {
         $productId = 10;
         $linkField = 'entity_id';
 
         /** @var MockObject $product */
         $product = $this->getMockBuilder(ProductInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getData', 'setData', 'getStoreId'])
+            ->setMethods(['getData','setData', 'getStoreId'])
             ->getMockForAbstractClass();
         $product->expects($this->atLeastOnce())->method('getData')->willReturnMap(
             [
@@ -218,14 +207,14 @@ class SaveHandlerTest extends TestCase
         $product->expects($this->atLeastOnce())->method('setData')->with('tier_price_changed', 1);
         $store = $this->getMockBuilder(StoreInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getWebsiteId'])
+            ->setMethods(['getWebsiteId'])
             ->getMockForAbstractClass();
         $store->expects($this->atLeastOnce())->method('getWebsiteId')->willReturn(1);
         $this->storeManager->expects($this->atLeastOnce())->method('getStore')->willReturn($store);
         /** @var MockObject $attribute */
         $attribute = $this->getMockBuilder(ProductAttributeInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getName', 'isScopeGlobal'])
+            ->setMethods(['getName', 'isScopeGlobal'])
             ->getMockForAbstractClass();
         $attribute->expects($this->atLeastOnce())->method('getName')->willReturn('tier_price');
         $attribute->expects($this->atLeastOnce())->method('isScopeGlobal')->willReturn(false);
@@ -233,7 +222,7 @@ class SaveHandlerTest extends TestCase
             ->willReturn($attribute);
         $productMetadata = $this->getMockBuilder(EntityMetadataInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getLinkField'])
+            ->setMethods(['getLinkField'])
             ->getMockForAbstractClass();
         $productMetadata->expects($this->atLeastOnce())->method('getLinkField')->willReturn($linkField);
         $this->metadataPoll->expects($this->atLeastOnce())->method('getMetadata')
@@ -241,23 +230,26 @@ class SaveHandlerTest extends TestCase
             ->willReturn($productMetadata);
         $customerGroup = $this->getMockBuilder(GroupInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId'])
+            ->setMethods(['getId'])
             ->getMockForAbstractClass();
         $customerGroup->expects($this->atLeastOnce())->method('getId')->willReturn(3200);
         $this->groupManagement->expects($this->atLeastOnce())->method('getAllCustomersGroup')
             ->willReturn($customerGroup);
         $this->tierPriceResource
+            ->expects($this->at(1))
             ->method('savePriceData')
-            ->withConsecutive(
-                [new \Magento\Framework\DataObject($tierPricesExpected[0])],
-                [new \Magento\Framework\DataObject($tierPricesExpected[1])],
-                [new \Magento\Framework\DataObject($tierPricesExpected[2])]
-            )
-            ->willReturnOnConsecutiveCalls(
-                $this->tierPriceResource,
-                $this->tierPriceResource,
-                $this->tierPriceResource
-            );
+            ->with(new \Magento\Framework\DataObject($tierPricesExpected[0]))
+            ->willReturnSelf();
+        $this->tierPriceResource
+            ->expects($this->at(2))
+            ->method('savePriceData')
+            ->with(new \Magento\Framework\DataObject($tierPricesExpected[1]))
+            ->willReturnSelf();
+        $this->tierPriceResource
+            ->expects($this->at(3))
+            ->method('savePriceData')
+            ->with(new \Magento\Framework\DataObject($tierPricesExpected[2]))
+            ->willReturnSelf();
         $this->tierPriceResource
             ->expects($this->atLeastOnce())
             ->method('loadPriceData')
@@ -266,9 +258,6 @@ class SaveHandlerTest extends TestCase
         $this->assertEquals($product, $this->saveHandler->execute($product));
     }
 
-    /**
-     * @return array
-     */
     public function executeWithWebsitePriceDataProvider(): array
     {
         $productId = 10;
@@ -281,8 +270,7 @@ class SaveHandlerTest extends TestCase
                     'cust_group' => 0,
                     'price' => 10,
                     'product_id' => $productId
-                ],
-                [
+                ],[
                     'price_id' => 2,
                     'website_id' => 1,
                     'price_qty' => 2,
@@ -311,8 +299,7 @@ class SaveHandlerTest extends TestCase
                     'value' => 10,
                     'percentage_value' => null,
                     'entity_id' => $productId
-                ],
-                [
+                ],[
                     'website_id' => 1,
                     'qty' => 2,
                     'customer_group_id' => 0,
@@ -320,8 +307,7 @@ class SaveHandlerTest extends TestCase
                     'value' => null,
                     'percentage_value' => 20,
                     'entity_id' => $productId
-                ],
-                [
+                ],[
                     'website_id' => 1,
                     'qty' => 3,
                     'customer_group_id' => 0,

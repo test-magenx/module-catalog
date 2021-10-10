@@ -80,7 +80,7 @@ class LocalFileAssertions extends Helper
     public function deleteDirectory($path): void
     {
         $realPath = $this->expandPath($path);
-        if ($this->driver->isDirectory($realPath)) {
+        if ($this->driver->isExists($realPath)) {
             $this->driver->deleteDirectory($realPath);
         }
     }
@@ -151,7 +151,7 @@ class LocalFileAssertions extends Helper
     }
 
     /**
-     * Asserts that a directory exists
+     * Asserts that a file or directory exists
      *
      * @param string $path
      * @param string $message
@@ -159,14 +159,14 @@ class LocalFileAssertions extends Helper
      *
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function assertDirectoryExists($path, $message = ''): void
+    public function assertPathExists($path, $message = ''): void
     {
         $realPath = $this->expandPath($path);
-        $this->assertTrue($this->driver->isDirectory($realPath), "Failed asserting $path exists. " . $message);
+        $this->assertTrue($this->driver->isExists($realPath), "Failed asserting $path exists. " . $message);
     }
 
     /**
-     * Asserts that a directory does not exist
+     * Asserts that a file or directory does not exist
      *
      * @param string $path
      * @param string $message
@@ -174,10 +174,10 @@ class LocalFileAssertions extends Helper
      *
      * @throws \Magento\Framework\Exception\FileSystemException
      */
-    public function assertDirectoryDoesNotExist($path, $message = ''): void
+    public function assertPathDoesNotExist($path, $message = ''): void
     {
         $realPath = $this->expandPath($path);
-        $this->assertFalse($this->driver->isDirectory($realPath), "Failed asserting $path does not exist. " . $message);
+        $this->assertFalse($this->driver->isExists($realPath), "Failed asserting $path does not exist. " . $message);
     }
 
     /**

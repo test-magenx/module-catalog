@@ -9,8 +9,8 @@ namespace Magento\Catalog\Test\Unit\Ui\Component;
 
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Catalog\Ui\Component\ColumnFactory;
-use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Filters\FilterModifier;
@@ -27,6 +27,11 @@ class ColumnFactoryTest extends TestCase
      * @var ColumnFactory
      */
     private $columnFactory;
+
+    /**
+     * @var ObjectManager
+     */
+    private $objectManager;
 
     /**
      * @var Attribute|MockObject
@@ -58,15 +63,32 @@ class ColumnFactoryTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->attribute = $this->createMock(Attribute::class);
-        $this->context = $this->createMock(ContextInterface::class);
+        $this->objectManager = new ObjectManager($this);
+
+        $this->attribute = $this->createPartialMock(
+            Attribute::class,
+            [
+                'getAttributeCode',
+                'getIsFilterableInGrid',
+                'getFrontendInput',
+                'getDefaultFrontendLabel',
+                'getIsVisibleInGrid',
+            ]
+        );
+        $this->context = $this->getMockForAbstractClass(ContextInterface::class);
         $this->uiComponentFactory = $this->createMock(UiComponentFactory::class);
-        $this->column = $this->createMock(ColumnInterface::class);
+        $this->column = $this->getMockForAbstractClass(ColumnInterface::class);
         $this->uiComponentFactory->method('create')
             ->willReturn($this->column);
-        $this->timezone = $this->createMock(TimezoneInterface::class);
+        $this->timezone = $this->getMockForAbstractClass(TimezoneInterface::class);
 
-        $this->columnFactory = new ColumnFactory($this->uiComponentFactory, $this->timezone);
+        $this->columnFactory = $this->objectManager->getObject(
+            ColumnFactory::class,
+            [
+                'componentFactory' => $this->uiComponentFactory,
+                'timezone' => $this->timezone,
+            ]
+        );
     }
 
     /**
@@ -245,74 +267,5 @@ class ColumnFactoryTest extends TestCase
                 'expectedTimezone' => 'config_timezone',
             ],
         ];
-    }
-
-    public function testCreateAttributeWithSource(): void
-    {
-        $this->context->method('getRequestParam')
-            ->with(FilterModifier::FILTER_MODIFIER, [])
-            ->willReturn([]);
-        $attributeCode = 'color';
-        $this->attribute->expects($this->atLeastOnce())
-            ->method('getAttributeCode')
-            ->willReturn($attributeCode);
-        $label = 'Color';
-        $this->attribute->expects($this->atLeastOnce())
-            ->method('getDefaultFrontendLabel')
-            ->willReturn($label);
-        $this->attribute->expects($this->atLeastOnce())
-            ->method('getFrontendInput')
-            ->willReturn('select');
-        $this->attribute->expects($this->atLeastOnce())
-            ->method('getIsVisibleInGrid')
-            ->willReturn(true);
-        $this->attribute->expects($this->atLeastOnce())
-            ->method('getIsFilterableInGrid')
-            ->willReturn(true);
-        $this->attribute->expects($this->atLeastOnce())
-            ->method('usesSource')
-            ->willReturn(true);
-        $source = $this->createMock(AbstractSource::class);
-        $this->attribute->expects($this->atLeastOnce())
-            ->method('getSource')
-            ->willReturn($source);
-        $options = [
-            ['label' => ''],
-            ['label' => 'admin1'],
-            ['label' => 'admin2'],
-        ];
-        $source->expects($this->atLeastOnce())
-            ->method('getAllOptions')
-            ->with(true, true)
-            ->willReturn($options);
-
-        $expectedConfig = [
-            'label' => __($label),
-            'dataType' => 'select',
-            'add_field' => true,
-            'visible' => true,
-            'filter' => 'select',
-            'component' => 'Magento_Ui/js/grid/columns/select',
-            'options' => array_map(
-                function (array $option) {
-                    $option['__disableTmpl'] = true;
-                    return $option;
-                },
-                $options
-            ),
-        ];
-        $expectedArguments = [
-            'data' => ['config' => $expectedConfig],
-            'context' => $this->context,
-        ];
-        $this->uiComponentFactory->expects($this->once())
-            ->method('create')
-            ->with($attributeCode, 'column', $expectedArguments)
-            ->willReturn($this->column);
-
-        $this->assertEquals(
-            $this->column,
-            $this->columnFactory->create($this->attribute, $this->context)
-        );
     }
 }

@@ -96,9 +96,6 @@ class FinalPriceBoxTest extends TestCase
      */
     private $minimalPriceCalculator;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->product = $this->getMockBuilder(Product::class)
@@ -136,8 +133,7 @@ class FinalPriceBoxTest extends TestCase
         $store = $this->getMockBuilder(StoreInterface::class)
             ->getMockForAbstractClass();
         $storeManager = $this->getMockBuilder(StoreManagerInterface::class)
-            ->onlyMethods(['getStore'])
-            ->addMethods(['getCode'])
+            ->setMethods(['getStore', 'getCode'])
             ->getMockForAbstractClass();
         $storeManager->expects($this->any())->method('getStore')->willReturn($store);
 
@@ -200,10 +196,7 @@ class FinalPriceBoxTest extends TestCase
         );
     }
 
-    /**
-    * @return void
-    */
-    public function testRenderMsrpDisabled(): void
+    public function testRenderMsrpDisabled()
     {
         $priceType = $this->createMock(MsrpPrice::class);
         $this->priceInfo->expects($this->once())
@@ -226,10 +219,7 @@ class FinalPriceBoxTest extends TestCase
         $this->assertMatchesRegularExpression('/[final_price]/', $result);
     }
 
-    /**
-    * @return void
-    */
-    public function testNotSalableItem(): void
+    public function testNotSalableItem()
     {
         $this->salableResolverMock
             ->expects($this->once())
@@ -241,10 +231,7 @@ class FinalPriceBoxTest extends TestCase
         $this->assertEmpty($result);
     }
 
-    /**
-    * @return void
-    */
-    public function testRenderMsrpEnabled(): void
+    public function testRenderMsrpEnabled()
     {
         $priceType = $this->createMock(MsrpPrice::class);
         $this->priceInfo->expects($this->once())
@@ -278,11 +265,7 @@ class FinalPriceBoxTest extends TestCase
             ->with('msrp_price', $this->product, $arguments)
             ->willReturn($priceBoxRender);
 
-        $this->salableResolverMock
-            ->expects($this->once())
-            ->method('isSalable')
-            ->with($this->product)
-            ->willReturn(true);
+        $this->salableResolverMock->expects($this->once())->method('isSalable')->with($this->product)->willReturn(true);
 
         $result = $this->object->toHtml();
 
@@ -294,10 +277,7 @@ class FinalPriceBoxTest extends TestCase
         );
     }
 
-    /**
-    * @return void
-    */
-    public function testRenderMsrpNotRegisteredException(): void
+    public function testRenderMsrpNotRegisteredException()
     {
         $this->logger->expects($this->once())
             ->method('critical');
@@ -307,11 +287,7 @@ class FinalPriceBoxTest extends TestCase
             ->with('msrp_price')
             ->willThrowException(new \InvalidArgumentException());
 
-        $this->salableResolverMock
-            ->expects($this->once())
-            ->method('isSalable')
-            ->with($this->product)
-            ->willReturn(true);
+        $this->salableResolverMock->expects($this->once())->method('isSalable')->with($this->product)->willReturn(true);
 
         $result = $this->object->toHtml();
 
@@ -321,10 +297,7 @@ class FinalPriceBoxTest extends TestCase
         $this->assertMatchesRegularExpression('/[final_price]/', $result);
     }
 
-    /**
-    * @return void
-    */
-    public function testRenderAmountMinimal(): void
+    public function testRenderAmountMinimal()
     {
         $priceId = 'price_id';
         $html = 'html';
@@ -344,7 +317,7 @@ class FinalPriceBoxTest extends TestCase
             'display_label' => 'As low as',
             'price_id' => $priceId,
             'include_container' => false,
-            'skip_adjustments' => true
+            'skip_adjustments' => true,
         ];
 
         $amountRender = $this->createPartialMock(Amount::class, ['toHtml']);
@@ -361,14 +334,12 @@ class FinalPriceBoxTest extends TestCase
     }
 
     /**
+     * @dataProvider hasSpecialPriceProvider
      * @param float $regularPrice
      * @param float $finalPrice
      * @param bool $expectedResult
-     *
-     * @return void
-     * @dataProvider hasSpecialPriceProvider
      */
-    public function testHasSpecialPrice(float $regularPrice, float $finalPrice, bool $expectedResult): void
+    public function testHasSpecialPrice($regularPrice, $finalPrice, $expectedResult)
     {
         $regularPriceType = $this->createMock(RegularPrice::class);
         $finalPriceType = $this->createMock(FinalPrice::class);
@@ -389,10 +360,14 @@ class FinalPriceBoxTest extends TestCase
             ->method('getAmount')
             ->willReturn($finalPriceAmount);
 
-        $this->priceInfo
+        $this->priceInfo->expects($this->at(0))
             ->method('getPrice')
-            ->withConsecutive([RegularPrice::PRICE_CODE], [FinalPrice::PRICE_CODE])
-            ->willReturnOnConsecutiveCalls($regularPriceType, $finalPriceType);
+            ->with(RegularPrice::PRICE_CODE)
+            ->willReturn($regularPriceType);
+        $this->priceInfo->expects($this->at(1))
+            ->method('getPrice')
+            ->with(FinalPrice::PRICE_CODE)
+            ->willReturn($finalPriceType);
 
         $this->assertEquals($expectedResult, $this->object->hasSpecialPrice());
     }
@@ -400,7 +375,7 @@ class FinalPriceBoxTest extends TestCase
     /**
      * @return array
      */
-    public function hasSpecialPriceProvider(): array
+    public function hasSpecialPriceProvider()
     {
         return [
             [10.0, 20.0, false],
@@ -409,10 +384,7 @@ class FinalPriceBoxTest extends TestCase
         ];
     }
 
-    /**
-    * @return void
-    */
-    public function testShowMinimalPrice(): void
+    public function testShowMinimalPrice()
     {
         $minimalPrice = 5.0;
         $finalPrice = 10.0;
@@ -440,10 +412,7 @@ class FinalPriceBoxTest extends TestCase
         $this->assertTrue($this->object->showMinimalPrice());
     }
 
-    /**
-    * @return void
-    */
-    public function testHidePrice(): void
+    public function testHidePrice()
     {
         $this->product->expects($this->any())
             ->method('getCanShowPrice')
@@ -452,29 +421,21 @@ class FinalPriceBoxTest extends TestCase
         $this->assertEmpty($this->object->toHtml());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetCacheKey(): void
+    public function testGetCacheKey()
     {
         $result = $this->object->getCacheKey();
         $this->assertStringEndsWith('list-category-page', $result);
     }
 
-    /**
-    * @return void
-    */
-    public function testGetCacheKeyInfoContainsDisplayMinimalPrice(): void
+    public function testGetCacheKeyInfoContainsDisplayMinimalPrice()
     {
         $this->assertArrayHasKey('display_minimal_price', $this->object->getCacheKeyInfo());
     }
 
     /**
-     * Test when is_product_list flag is not specified.
-     *
-     * @return void
+     * Test when is_product_list flag is not specified
      */
-    public function testGetCacheKeyInfoContainsIsProductListFlagByDefault(): void
+    public function testGetCacheKeyInfoContainsIsProductListFlagByDefault()
     {
         $cacheInfo = $this->object->getCacheKeyInfo();
         self::assertArrayHasKey('is_product_list', $cacheInfo);
@@ -482,14 +443,12 @@ class FinalPriceBoxTest extends TestCase
     }
 
     /**
-     * Test when is_product_list flag is specified.
+     * Test when is_product_list flag is specified
      *
      * @param bool $flag
-     *
-     * @return void
      * @dataProvider isProductListDataProvider
      */
-    public function testGetCacheKeyInfoContainsIsProductListFlag($flag): void
+    public function testGetCacheKeyInfoContainsIsProductListFlag($flag)
     {
         $this->object->setData('is_product_list', $flag);
         $cacheInfo = $this->object->getCacheKeyInfo();
@@ -498,24 +457,20 @@ class FinalPriceBoxTest extends TestCase
     }
 
     /**
-     * Test when is_product_list flag is not specified.
-     *
-     * @return void
+     * Test when is_product_list flag is not specified
      */
-    public function testIsProductListByDefault(): void
+    public function testIsProductListByDefault()
     {
         self::assertFalse($this->object->isProductList());
     }
 
     /**
-     * Test when is_product_list flag is specified.
+     * Test when is_product_list flag is specified
      *
      * @param bool $flag
-     *
-     * @return void
      * @dataProvider isProductListDataProvider
      */
-    public function testIsProductList($flag): void
+    public function testIsProductList($flag)
     {
         $this->object->setData('is_product_list', $flag);
         self::assertEquals($flag, $this->object->isProductList());
@@ -524,11 +479,11 @@ class FinalPriceBoxTest extends TestCase
     /**
      * @return array
      */
-    public function isProductListDataProvider(): array
+    public function isProductListDataProvider()
     {
         return [
             'is_not_product_list' => [false],
-            'is_product_list' => [true]
+            'is_product_list' => [true],
         ];
     }
 }

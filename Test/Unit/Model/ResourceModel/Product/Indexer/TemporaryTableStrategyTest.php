@@ -32,9 +32,6 @@ class TemporaryTableStrategyTest extends TestCase
      */
     private $resourceMock;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->tableStrategyMock = $this->createMock(Strategy::class);
@@ -46,28 +43,19 @@ class TemporaryTableStrategyTest extends TestCase
         );
     }
 
-    /**
-    * @return void
-    */
-    public function testGetUseIdxTable(): void
+    public function testGetUseIdxTable()
     {
         $this->tableStrategyMock->expects($this->once())->method('getUseIdxTable')->willReturn(true);
         $this->assertTrue($this->model->getUseIdxTable());
     }
 
-    /**
-    * @return void
-    */
-    public function testSetUseIdxTable(): void
+    public function testSetUseIdxTable()
     {
         $this->tableStrategyMock->expects($this->once())->method('setUseIdxTable')->with(true)->willReturnSelf();
         $this->assertEquals($this->tableStrategyMock, $this->model->setUseIdxTable(true));
     }
 
-    /**
-    * @return void
-    */
-    public function testGetTableName(): void
+    public function testGetTableName()
     {
         $tablePrefix = 'prefix';
         $expectedResult = $tablePrefix . StrategyInterface::IDX_SUFFIX;
@@ -79,10 +67,7 @@ class TemporaryTableStrategyTest extends TestCase
         $this->assertEquals($expectedResult, $this->model->getTableName($tablePrefix));
     }
 
-    /**
-    * @return void
-    */
-    public function testPrepareTableName(): void
+    public function testPrepareTableName()
     {
         $tablePrefix = 'prefix';
         $expectedResult = $tablePrefix . TemporaryTableStrategy::TEMP_SUFFIX;
@@ -95,10 +80,14 @@ class TemporaryTableStrategyTest extends TestCase
             ->method('getConnection')
             ->with('indexer')
             ->willReturn($connectionMock);
-        $this->resourceMock
+        $this->resourceMock->expects($this->at(1))
             ->method('getTableName')
-            ->withConsecutive([$expectedResult], [$tempTableName])
-            ->willReturnOnConsecutiveCalls($expectedResult, $tempTableName);
+            ->with($expectedResult)
+            ->willReturn($expectedResult);
+        $this->resourceMock->expects($this->at(2))
+            ->method('getTableName')
+            ->with($tempTableName)
+            ->willReturn($tempTableName);
         $connectionMock->expects($this->once())
             ->method('createTemporaryTableLike')
             ->with($expectedResult, $tempTableName, true);

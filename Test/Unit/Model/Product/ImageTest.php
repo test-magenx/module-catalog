@@ -106,9 +106,6 @@ class ImageTest extends TestCase
      */
     private $paramsBuilder;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $objectManager = new ObjectManager($this);
@@ -120,27 +117,25 @@ class ImageTest extends TestCase
 
         $this->storeManager = $this->getMockBuilder(StoreManager::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getStore', 'getWebsite'])->getMock();
+            ->setMethods(['getStore', 'getWebsite'])->getMock();
         $store = $this->getMockBuilder(Store::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', '__sleep', 'getBaseUrl'])->getMock();
+            ->setMethods(['getId', '__sleep', 'getBaseUrl'])->getMock();
         $store->expects($this->any())->method('getId')->willReturn(1);
         $store->expects($this->any())->method('getBaseUrl')->willReturn('http://magento.com/media/');
         $this->storeManager->expects($this->any())->method('getStore')->willReturn($store);
 
         $this->config = $this->getMockBuilder(Config::class)
-            ->onlyMethods(['getBaseMediaPath'])
-            ->disableOriginalConstructor()
+            ->setMethods(['getBaseMediaPath'])->disableOriginalConstructor()
             ->getMock();
         $this->config->expects($this->any())->method('getBaseMediaPath')->willReturn('catalog/product');
         $this->coreFileHelper = $this->getMockBuilder(Database::class)
-            ->onlyMethods(['saveFile', 'deleteFolder'])
-            ->disableOriginalConstructor()
+            ->setMethods(['saveFile', 'deleteFolder'])->disableOriginalConstructor()
             ->getMock();
 
         $this->mediaDirectory = $this->getMockBuilder(Write::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create', 'isFile', 'isExist', 'getAbsolutePath'])
+            ->setMethods(['create', 'isFile', 'isExist', 'getAbsolutePath'])
             ->getMock();
 
         $this->filesystem = $this->createMock(Filesystem::class);
@@ -151,11 +146,11 @@ class ImageTest extends TestCase
 
         $this->viewAssetImageFactory = $this->getMockBuilder(ImageFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
         $this->viewAssetPlaceholderFactory = $this->getMockBuilder(PlaceholderFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
         $this->serializer = $this->getMockBuilder(
             SerializerInterface::class
@@ -203,74 +198,50 @@ class ImageTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testSetGetQuality(): void
+    public function testSetGetQuality()
     {
         $this->image->setQuality(100);
         $this->assertEquals(100, $this->image->getQuality());
     }
 
-    /**
-     * @return void
-     */
-    public function testSetGetKeepAspectRatio(): void
+    public function testSetGetKeepAspectRatio()
     {
         $result = $this->image->setKeepAspectRatio(true);
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSetKeepFrame(): void
+    public function testSetKeepFrame()
     {
         $result = $this->image->setKeepFrame(true);
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSetKeepTransparency(): void
+    public function testSetKeepTransparency()
     {
         $result = $this->image->setKeepTransparency(true);
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSetConstrainOnly(): void
+    public function testSetConstrainOnly()
     {
         $result = $this->image->setConstrainOnly(true);
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSetBackgroundColor(): void
+    public function testSetBackgroundColor()
     {
         $result = $this->image->setBackgroundColor([0, 0, 0]);
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSetSize(): void
+    public function testSetSize()
     {
         $this->image->setSize('99xsadf');
         $this->assertEquals(99, $this->image->getWidth());
         $this->assertNull($this->image->getHeight());
     }
 
-    /**
-     * @return void
-     */
-    public function testSetGetBaseFile(): void
+    public function testSetGetBaseFile()
     {
         $miscParams = [
             'image_type' => null,
@@ -282,7 +253,7 @@ class ImageTest extends TestCase
             'constrain_only' => 'doconstrainonly',
             'background' => 'ffffff',
             'angle' => null,
-            'quality' => 80
+            'quality' => 80,
         ];
         $this->paramsBuilder->expects(self::once())
             ->method('build')
@@ -297,7 +268,7 @@ class ImageTest extends TestCase
             ->with(
                 [
                     'miscParams' => $miscParams,
-                    'filePath' => '/somefile.png'
+                    'filePath' => '/somefile.png',
                 ]
             )
             ->willReturn($this->imageAsset);
@@ -311,10 +282,7 @@ class ImageTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testSetBaseNoSelectionFile(): void
+    public function testSetBaseNoSelectionFile()
     {
         $this->viewAssetPlaceholderFactory->expects($this->once())->method('create')->willReturn($this->imageAsset);
         $this->imageAsset->expects($this->any())->method('getSourceFile')->willReturn('Default Placeholder Path');
@@ -322,10 +290,7 @@ class ImageTest extends TestCase
         $this->assertEquals('Default Placeholder Path', $this->image->getBaseFile());
     }
 
-    /**
-     * @return void
-     */
-    public function testSetGetImageProcessor(): void
+    public function testSetGetImageProcessor()
     {
         $imageProcessor = $this->getMockBuilder(\Magento\Framework\Image::class)->disableOriginalConstructor()
             ->getMock();
@@ -334,10 +299,7 @@ class ImageTest extends TestCase
         $this->assertSame($imageProcessor, $this->image->getImageProcessor());
     }
 
-    /**
-     * @return void
-     */
-    public function testResize(): void
+    public function testResize()
     {
         $this->image->setWidth(100);
         $this->image->setHeight(100);
@@ -350,13 +312,9 @@ class ImageTest extends TestCase
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testRotate(): void
+    public function testRotate()
     {
-        $imageProcessor = $this->getMockBuilder(\Magento\Framework\Image::class)
-            ->disableOriginalConstructor()
+        $imageProcessor = $this->getMockBuilder(\Magento\Framework\Image::class)->disableOriginalConstructor()
             ->getMock();
         $imageProcessor->expects($this->once())->method('rotate')->with(90)->willReturn(true);
         $this->image->setImageProcessor($imageProcessor);
@@ -364,51 +322,40 @@ class ImageTest extends TestCase
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSetAngle(): void
+    public function testSetAngle()
     {
         $result = $this->image->setAngle(90);
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSetWatermark(): void
+    public function testSetWatermark()
     {
         $website = $this->getMockBuilder(Website::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', '__sleep'])->getMock();
+            ->setMethods(['getId', '__sleep'])->getMock();
         $website->expects($this->any())->method('getId')->willReturn(1);
         $this->storeManager->expects($this->any())->method('getWebsite')->willReturn($website);
-        $this->mediaDirectory
-            ->method('isExist')
-            ->withConsecutive([], [], [], ['catalog/product/watermark//somefile.png'])
-            ->willReturnOnConsecutiveCalls(null, null, null, true);
+        $this->mediaDirectory->expects($this->at(3))->method('isExist')->with('catalog/product/watermark//somefile.png')
+            ->willReturn(true);
         $absolutePath = dirname(dirname(__DIR__)) . '/_files/catalog/product/watermark/somefile.png';
         $this->mediaDirectory->expects($this->any())->method('getAbsolutePath')
             ->with('catalog/product/watermark//somefile.png')
             ->willReturn($absolutePath);
 
-        $imageProcessor = $this->getMockBuilder(\Magento\Framework\Image::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(
-                [
-                    'keepAspectRatio',
-                    'keepFrame',
-                    'keepTransparency',
-                    'constrainOnly',
-                    'backgroundColor',
-                    'quality',
-                    'setWatermarkPosition',
-                    'setWatermarkImageOpacity',
-                    'setWatermarkWidth',
-                    'setWatermarkHeight',
-                    'watermark'
-                ]
-            )->getMock();
+        $imageProcessor = $this->getMockBuilder(\Magento\Framework\Image::class)->disableOriginalConstructor()
+            ->setMethods([
+                'keepAspectRatio',
+                'keepFrame',
+                'keepTransparency',
+                'constrainOnly',
+                'backgroundColor',
+                'quality',
+                'setWatermarkPosition',
+                'setWatermarkImageOpacity',
+                'setWatermarkWidth',
+                'setWatermarkHeight',
+                'watermark',
+            ])->getMock();
         $imageProcessor->expects($this->once())->method('setWatermarkPosition')->with('center')
             ->willReturn(true);
         $imageProcessor->expects($this->once())->method('setWatermarkImageOpacity')->with(50)
@@ -430,10 +377,7 @@ class ImageTest extends TestCase
         $this->assertSame($this->image, $result);
     }
 
-    /**
-     * @return void
-     */
-    public function testSaveFile(): void
+    public function testSaveFile()
     {
         $imageProcessor = $this->getMockBuilder(
             \Magento\Framework\Image::class
@@ -445,10 +389,7 @@ class ImageTest extends TestCase
         $this->image->saveFile();
     }
 
-    /**
-     * @return void
-     */
-    public function testSaveFileNoSelection(): void
+    public function testSaveFileNoSelection()
     {
         $imageProcessor = $this->getMockBuilder(
             \Magento\Framework\Image::class
@@ -458,20 +399,14 @@ class ImageTest extends TestCase
         $this->assertSame($this->image, $this->image->saveFile());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetUrl(): void
+    public function testGetUrl()
     {
         $this->testSetGetBaseFile();
         $this->imageAsset->expects($this->any())->method('getUrl')->willReturn('url of exist image');
         $this->assertEquals('url of exist image', $this->image->getUrl());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetUrlNoSelection(): void
+    public function testGetUrlNoSelection()
     {
         $this->viewAssetPlaceholderFactory->expects($this->once())->method('create')->willReturn($this->imageAsset);
         $this->imageAsset->expects($this->any())->method('getUrl')->willReturn('Default Placeholder URL');
@@ -479,19 +414,13 @@ class ImageTest extends TestCase
         $this->assertEquals('Default Placeholder URL', $this->image->getUrl());
     }
 
-    /**
-     * @return void
-     */
-    public function testSetGetDestinationSubdir(): void
+    public function testSetGetDestinationSubdir()
     {
         $this->image->setDestinationSubdir('image_type');
         $this->assertEquals('image_type', $this->image->getDestinationSubdir());
     }
 
-    /**
-     * @return void
-     */
-    public function testIsCached(): void
+    public function testIsCached()
     {
         $this->testSetGetBaseFile();
         $absolutePath = dirname(dirname(__DIR__)) . '/_files/catalog/product/watermark/somefile.png';
@@ -502,30 +431,21 @@ class ImageTest extends TestCase
         $this->assertTrue($this->image->isCached());
     }
 
-    /**
-     * @return void
-     */
-    public function testClearCache(): void
+    public function testClearCache()
     {
         $this->coreFileHelper->expects($this->once())->method('deleteFolder')->willReturn(true);
         $this->cacheManager->expects($this->once())->method('clean');
         $this->image->clearCache();
     }
 
-    /**
-     * @return void
-     */
-    public function testResizeWithoutSize(): void
+    public function testResizeWithoutSize()
     {
         $this->image->setHeight(null);
         $this->image->setWidth(null);
         $this->assertSame($this->image, $this->image->resize());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetImageProcessor(): void
+    public function testGetImageProcessor()
     {
         $imageProcessor = $this->getMockBuilder(
             \Magento\Framework\Image::class
@@ -535,18 +455,12 @@ class ImageTest extends TestCase
         $this->assertSame($imageProcessor, $this->image->getImageProcessor());
     }
 
-    /**
-     * @return void
-     */
-    public function testIsBaseFilePlaceholder(): void
+    public function testIsBaseFilePlaceholder()
     {
         $this->assertFalse($this->image->isBaseFilePlaceholder());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetResizedImageInfoWithCache(): void
+    public function testGetResizedImageInfoWithCache()
     {
         $absolutePath = dirname(dirname(__DIR__)) . '/_files/catalog/product/watermark/somefile.png';
         $this->imageAsset->expects($this->any())->method('getPath')->willReturn($absolutePath);
@@ -557,10 +471,7 @@ class ImageTest extends TestCase
         $this->assertEquals(['image data'], $this->image->getResizedImageInfo());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetResizedImageInfoEmptyCache(): void
+    public function testGetResizedImageInfoEmptyCache()
     {
         $absolutePath = dirname(dirname(__DIR__)) . '/_files/catalog/product/watermark/somefile.png';
         $this->imageAsset->expects($this->any())->method('getPath')->willReturn($absolutePath);

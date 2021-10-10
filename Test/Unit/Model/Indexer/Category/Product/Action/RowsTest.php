@@ -107,9 +107,6 @@ class RowsTest extends TestCase
      */
     private $rowsModel;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp() : void
     {
         $this->workingStateProvider = $this->getMockBuilder(WorkingStateProvider::class)
@@ -183,9 +180,6 @@ class RowsTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function testExecuteWithIndexerWorking() : void
     {
         $categoryId = '1';
@@ -226,22 +220,26 @@ class RowsTest extends TestCase
         $this->connection->expects($this->any())
             ->method('fetchOne')
             ->willReturn($categoryId);
-        $this->indexerRegistry
+        $this->indexerRegistry->expects($this->at(0))
             ->method('get')
-            ->withConsecutive(
-                [ProductCategoryIndexer::INDEXER_ID],
-                [ProductCategoryIndexer::INDEXER_ID],
-                [CategoryProductIndexer::INDEXER_ID],
-                [ProductCategoryIndexer::INDEXER_ID],
-                [CategoryProductIndexer::INDEXER_ID]
-            )
-            ->willReturnOnConsecutiveCalls(
-                $this->indexer,
-                $this->indexer,
-                $this->indexer,
-                $this->indexer,
-                $this->indexer
-            );
+            ->with(ProductCategoryIndexer::INDEXER_ID)
+            ->willReturn($this->indexer);
+        $this->indexerRegistry->expects($this->at(1))
+            ->method('get')
+            ->with(ProductCategoryIndexer::INDEXER_ID)
+            ->willReturn($this->indexer);
+        $this->indexerRegistry->expects($this->at(2))
+            ->method('get')
+            ->with(CategoryProductIndexer::INDEXER_ID)
+            ->willReturn($this->indexer);
+        $this->indexerRegistry->expects($this->at(3))
+            ->method('get')
+            ->with(ProductCategoryIndexer::INDEXER_ID)
+            ->willReturn($this->indexer);
+        $this->indexerRegistry->expects($this->at(4))
+            ->method('get')
+            ->with(CategoryProductIndexer::INDEXER_ID)
+            ->willReturn($this->indexer);
         $this->indexer->expects($this->any())
             ->method('getId')
             ->willReturn(ProductCategoryIndexer::INDEXER_ID);

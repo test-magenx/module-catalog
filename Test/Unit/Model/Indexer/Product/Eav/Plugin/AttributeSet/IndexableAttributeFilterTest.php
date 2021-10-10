@@ -16,25 +16,27 @@ use PHPUnit\Framework\TestCase;
 
 class IndexableAttributeFilterTest extends TestCase
 {
-    /**
-     * @return void
-     */
-    public function testFilter(): void
+    public function testFilter()
     {
         $catalogResourceMock = $this->getMockBuilder(Attribute::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['load', 'isIndexable'])
+            ->setMethods(['load', 'isIndexable'])
             ->getMock();
         $catalogResourceMock->expects($this->any())
             ->method('load')
             ->willReturnSelf();
-        $catalogResourceMock
+        $catalogResourceMock->expects($this->at(1))
             ->method('isIndexable')
-            ->willReturnOnConsecutiveCalls(true, false);
+            ->willReturn(true);
+        $catalogResourceMock->expects($this->at(2))
+            ->method('isIndexable')
+            ->willReturn(false);
 
-        $eavAttributeFactoryMock = $this->getMockBuilder(AttributeFactory::class)
+        $eavAttributeFactoryMock = $this->getMockBuilder(
+            AttributeFactory::class
+        )
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
         $eavAttributeFactoryMock->expects($this->once())
             ->method('create')
@@ -42,7 +44,7 @@ class IndexableAttributeFilterTest extends TestCase
 
         $attributeMock1 = $this->getMockBuilder(\Magento\Eav\Model\Entity\Attribute::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', 'getAttributeId', 'getAttributeCode', 'load'])
+            ->setMethods(['getId', 'getAttributeId', 'getAttributeCode', 'load'])
             ->getMock();
         $attributeMock1->expects($this->any())
             ->method('getAttributeCode')
@@ -53,7 +55,7 @@ class IndexableAttributeFilterTest extends TestCase
 
         $attributeMock2 = $this->getMockBuilder(\Magento\Eav\Model\Entity\Attribute::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', 'getAttributeId', 'getAttributeCode', 'load'])
+            ->setMethods(['getId', 'getAttributeId', 'getAttributeCode', 'load'])
             ->getMock();
         $attributeMock2->expects($this->any())
             ->method('getAttributeCode')
@@ -66,7 +68,7 @@ class IndexableAttributeFilterTest extends TestCase
 
         $groupMock = $this->getMockBuilder(Group::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getAttributes'])
+            ->setMethods(['getAttributes'])
             ->getMock();
         $groupMock->expects($this->once())
             ->method('getAttributes')
@@ -74,7 +76,7 @@ class IndexableAttributeFilterTest extends TestCase
 
         $attributeSetMock = $this->getMockBuilder(Set::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getGroups'])
+            ->setMethods(['getGroups'])
             ->getMock();
         $attributeSetMock->expects($this->once())
             ->method('getGroups')

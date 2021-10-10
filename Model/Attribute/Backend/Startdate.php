@@ -7,7 +7,7 @@ namespace Magento\Catalog\Model\Attribute\Backend;
 
 /**
  *
- * Special Start Date attribute backend
+ * Speical Start Date attribute backend
  *
  * @api
  *
@@ -83,7 +83,7 @@ class Startdate extends \Magento\Eav\Model\Entity\Attribute\Backend\Datetime
         $attr = $this->getAttribute();
         $maxDate = $attr->getMaxValue();
         $startDate = $this->_getValueForSave($object);
-        if ($startDate === false || $startDate === null) {
+        if ($startDate === false) {
             return true;
         }
 

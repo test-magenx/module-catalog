@@ -10,17 +10,17 @@
               css="getAdjustmentCssClasses($row())">
             <span if="label"
                   class="price-label"
-                  text="label"></span>
+                  text="label"/>
 
             <span class="price-wrapper"
                   css="priceWrapperCssClasses"
                   attr="priceWrapperAttr"
                   data-price-amount=""
                   data-price-type="finalPrice"
-                  html="getPriceUnsanitizedHtml($row())"></span>
+                  html="getPrice($row())"/>
 
             <each args="data: getAdjustments(), as: '$adj'">
-                <render args="$adj.getBody()"></render>
+                <render args="$adj.getBody()"/>
             </each>
         </span>
     </span>

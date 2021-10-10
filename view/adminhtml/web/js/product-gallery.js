@@ -63,18 +63,10 @@ define([
 
             this._bind();
 
-            this._isInitializingItems = true;
-            this._initializedItemCount = 0;
-            this._lastInitializedElement = null;
-
             $.each(this.options.images, $.proxy(function (index, imageData) {
                 this.element.trigger('addItem', imageData);
             }, this));
 
-            this._updateImagesRoles();
-            this._contentUpdated();
-
-            this._isInitializingItems = false;
             this.options.initialized = true;
         },
 
@@ -194,23 +186,13 @@ define([
          * @private
          */
         _addItem: function (event, imageData) {
-            var element,
+            var count = this.element.find(this.options.imageSelector).length,
+                element,
                 imgElement,
-                lastElement,
-                count,
-                position;
-
-            if (this._isInitializingItems) {
-                count = this._initializedItemCount++;
-                lastElement = this._lastInitializedElement;
-            } else {
-                count = this.element.find(this.options.imageSelector).length;
+                position = count + 1,
                 lastElement = this.element.find(this.options.imageSelector + ':last');
-            }
 
-            position = count + 1;
-
-            if (lastElement && lastElement.length === 1) {
+            if (lastElement.length === 1) {
                 position = parseInt(lastElement.data('imageData').position || count, 10) + 1;
             }
             imageData = $.extend({
@@ -231,8 +213,6 @@ define([
             } else {
                 element.insertAfter(lastElement);
             }
-
-            this._lastInitializedElement = element;
 
             if (!this.options.initialized &&
                 this.options.images.length === 0 ||
@@ -255,10 +235,8 @@ define([
                 }
             }, this));
 
-            if (!this._isInitializingItems) {
-                this._updateImagesRoles();
-                this._contentUpdated();
-            }
+            this._updateImagesRoles();
+            this._contentUpdated();
         },
 
         /**

@@ -102,9 +102,6 @@ class ActionTest extends TestCase
      */
     private $productCollectionMock;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp(): void
     {
         $this->contextMock = $this->getMockBuilder(Context::class)
@@ -166,10 +163,7 @@ class ActionTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    private function prepareAdapter(): void
+    private function prepareAdapter()
     {
         $this->connectionMock = $this->getMockBuilder(AdapterInterface::class)
             ->getMockForAbstractClass();
@@ -179,12 +173,7 @@ class ActionTest extends TestCase
             ->willReturn('catalog_product_entity');
     }
 
-    /**
-     * @param $items
-     *
-     * @return void
-     */
-    private function prepareProductCollection($items): void
+    private function prepareProductCollection($items)
     {
         $this->productCollectionMock = $this->getMockBuilder(ProductCollection::class)
             ->disableOriginalConstructor()
@@ -207,11 +196,9 @@ class ActionTest extends TestCase
      * @param string $typeId
      * @param Product[] $items
      * @param int[] $entityIds
-     *
-     * @return void
      * @dataProvider updateProductHasWeightAttributesDataProvider
      */
-    public function testUpdateProductHasWeightAttributes($hasWeight, $typeId, $items, $entityIds): void
+    public function testUpdateProductHasWeightAttributes($hasWeight, $typeId, $items, $entityIds)
     {
         $this->prepareAdapter();
         $this->prepareProductCollection($items);
@@ -246,7 +233,7 @@ class ActionTest extends TestCase
      *
      * @return array
      */
-    public function updateProductHasWeightAttributesDataProvider(): array
+    public function updateProductHasWeightAttributesDataProvider()
     {
         return [
             [
@@ -270,10 +257,7 @@ class ActionTest extends TestCase
         ];
     }
 
-    /**
-     * @return array
-     */
-    private function getProductsSimpleToVirtual(): array
+    private function getProductsSimpleToVirtual()
     {
         $result = [];
 
@@ -281,13 +265,17 @@ class ActionTest extends TestCase
             $productMock = $this->getMockBuilder(Product::class)
                 ->disableOriginalConstructor()
                 ->getMock();
-            $productMock->method('getId')->willReturn($entityId);
-            $productMock->method('getTypeId')
-                ->willReturnOnConsecutiveCalls(
-                    Type::TYPE_SIMPLE,
-                    Type::TYPE_VIRTUAL,
-                    Type::TYPE_VIRTUAL
-                );
+            $productMock->method('getId')
+                ->willReturn($entityId);
+            $productMock->expects($this->at(1))
+                ->method('getTypeId')
+                ->willReturn(Type::TYPE_SIMPLE);
+            $productMock->expects($this->at(2))
+                ->method('getTypeId')
+                ->willReturn(Type::TYPE_VIRTUAL);
+            $productMock->expects($this->at(3))
+                ->method('getTypeId')
+                ->willReturn(Type::TYPE_VIRTUAL);
 
             $result[] = $productMock;
         }
@@ -295,10 +283,7 @@ class ActionTest extends TestCase
         return $result;
     }
 
-    /**
-     * @return array
-     */
-    private function getProductsVirtualToSimple(): array
+    private function getProductsVirtualToSimple()
     {
         $result = [];
 
@@ -306,13 +291,17 @@ class ActionTest extends TestCase
             $productMock = $this->getMockBuilder(Product::class)
                 ->disableOriginalConstructor()
                 ->getMock();
-            $productMock->method('getId')->willReturn($entityId);
-            $productMock->method('getTypeId')
-                ->willReturnOnConsecutiveCalls(
-                    Type::TYPE_VIRTUAL,
-                    Type::TYPE_SIMPLE,
-                    Type::TYPE_SIMPLE
-                );
+            $productMock->method('getId')
+                ->willReturn($entityId);
+            $productMock->expects($this->at(1))
+                ->method('getTypeId')
+                ->willReturn(Type::TYPE_VIRTUAL);
+            $productMock->expects($this->at(2))
+                ->method('getTypeId')
+                ->willReturn(Type::TYPE_SIMPLE);
+            $productMock->expects($this->at(3))
+                ->method('getTypeId')
+                ->willReturn(Type::TYPE_SIMPLE);
 
             $result[] = $productMock;
         }
@@ -320,10 +309,7 @@ class ActionTest extends TestCase
         return $result;
     }
 
-    /**
-     * @return array
-     */
-    private function getProductsMixedTypes(): array
+    private function getProductsMixedTypes()
     {
         $result = [];
 
@@ -336,15 +322,22 @@ class ActionTest extends TestCase
                 ->willReturn($entityId);
 
             if ($i < 2) {
-                $productMock->method('getTypeId')
+                $productMock->expects($this->at(1))
+                    ->method('getTypeId')
+                    ->willReturn(Type::TYPE_SIMPLE);
+                $productMock->expects($this->at(2))
+                    ->method('getTypeId')
                     ->willReturn(Type::TYPE_SIMPLE);
             } else {
-                $productMock->method('getTypeId')
-                    ->willReturnOnConsecutiveCalls(
-                        Type::TYPE_SIMPLE,
-                        Type::TYPE_VIRTUAL,
-                        Type::TYPE_VIRTUAL
-                    );
+                $productMock->expects($this->at(1))
+                    ->method('getTypeId')
+                    ->willReturn(Type::TYPE_SIMPLE);
+                $productMock->expects($this->at(2))
+                    ->method('getTypeId')
+                    ->willReturn(Type::TYPE_VIRTUAL);
+                $productMock->expects($this->at(3))
+                    ->method('getTypeId')
+                    ->willReturn(Type::TYPE_VIRTUAL);
             }
 
             $result[] = $productMock;

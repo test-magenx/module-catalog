@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 declare(strict_types=1);
 
 namespace Magento\Catalog\Test\Unit\Model\Product\Price\Validation;
@@ -32,13 +33,13 @@ class ResultTest extends TestCase
     private $objectManager;
 
     /**
-     * @inheritDoc
+     * Setup environment for test
      */
     protected function setUp(): void
     {
         $this->priceUpdateResultFactory = $this->getMockBuilder(PriceUpdateResultInterfaceFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
 
         $this->objectManager = new ObjectManagerHelper($this);
@@ -54,28 +55,27 @@ class ResultTest extends TestCase
     }
 
     /**
-     * Test getFailedRowIds() function.
-     *
-     * @return void
+     * Test getFailedRowIds() function
      */
-    public function testGetFailedRowIds(): void
+    public function testGetFailedRowIds()
     {
         $this->assertEquals([1, 2], $this->model->getFailedRowIds());
     }
 
     /**
-     * Test getFailedItems() function.
-     *
-     * @return void
+     * Test getFailedItems() function
      */
-    public function testGetFailedItems(): void
+    public function testGetFailedItems()
     {
         $priceUpdateResult1 = $this->getMockForAbstractClass(PriceUpdateResultInterface::class);
         $priceUpdateResult2 = $this->getMockForAbstractClass(PriceUpdateResultInterface::class);
 
-        $this->priceUpdateResultFactory
+        $this->priceUpdateResultFactory->expects($this->at(0))
             ->method('create')
-            ->willReturnOnConsecutiveCalls($priceUpdateResult1, $priceUpdateResult2);
+            ->willReturn($priceUpdateResult1);
+        $this->priceUpdateResultFactory->expects($this->at(1))
+            ->method('create')
+            ->willReturn($priceUpdateResult2);
 
         $priceUpdateResult1->expects($this->once())->method('setMessage')
             ->with('Invalid attribute color = 1');

@@ -265,7 +265,6 @@ class ProductTest extends TestCase
 
     /**
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     * @inheritDoc
      */
     protected function setUp(): void
     {
@@ -276,7 +275,7 @@ class ProductTest extends TestCase
             ['isEnabled']
         );
         $this->extensionAttributes = $this->getMockBuilder(ExtensionAttributesInterface::class)
-            ->addMethods(['getWebsiteIds', 'setWebsiteIds'])
+            ->setMethods(['getWebsiteIds', 'setWebsiteIds'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
 
@@ -328,8 +327,7 @@ class ProductTest extends TestCase
             ->willReturn($actionValidatorMock);
 
         $this->optionInstanceMock = $this->getMockBuilder(Option::class)
-            ->onlyMethods(['setProduct', '__sleep'])
-            ->addMethods(['saveOptions'])
+            ->setMethods(['setProduct', 'saveOptions', '__sleep'])
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -384,12 +382,12 @@ class ProductTest extends TestCase
             ->getMock();
         $this->imageCacheFactory = $this->getMockBuilder(CacheFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
 
         $this->mediaGalleryEntryFactoryMock =
             $this->getMockBuilder(ProductAttributeMediaGalleryEntryInterfaceFactory::class)
-                ->onlyMethods(['create'])
+                ->setMethods(['create'])
                 ->disableOriginalConstructor()
                 ->getMock();
 
@@ -424,13 +422,13 @@ class ProductTest extends TestCase
             ->getMock();
         $this->collectionFactoryMock = $this->getMockBuilder(CollectionFactory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
+            ->setMethods(['create'])
             ->getMock();
         $this->mediaConfig = $this->createMock(\Magento\Catalog\Model\Product\Media\Config::class);
         $this->eavConfig = $this->createMock(Config::class);
 
         $this->productExtAttributes = $this->getMockBuilder(ProductExtensionInterface::class)
-            ->addMethods(['getStockItem'])
+            ->setMethods(['getStockItem'])
             ->getMockForAbstractClass();
         $this->extensionAttributesFactory
             ->expects($this->any())
@@ -476,20 +474,17 @@ class ProductTest extends TestCase
         );
     }
 
-    /**
-    * @return void
-    */
-    public function testGetAttributes(): void
+    public function testGetAttributes()
     {
         $productType = $this->getMockBuilder(AbstractType::class)
-            ->onlyMethods(['getSetAttributes'])
+            ->setMethods(['getSetAttributes'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $this->productTypeInstanceMock->expects($this->any())->method('factory')->willReturn(
             $productType
         );
         $attribute = $this->getMockBuilder(AbstractAttribute::class)
-            ->onlyMethods(['isInGroup'])
+            ->setMethods(['isInGroup'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $attribute->expects($this->any())->method('isInGroup')->willReturn(true);
@@ -501,10 +496,7 @@ class ProductTest extends TestCase
         $this->assertEquals($expect, $this->model->getAttributes());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetStoreIds(): void
+    public function testGetStoreIds()
     {
         $expectedStoreIds = [1, 2, 3];
         $websiteIds = ['test'];
@@ -514,10 +506,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     * @param bool $isObjectNew
-     *
-     * @return void
      * @dataProvider getSingleStoreIds
+     * @param bool $isObjectNew
+     * @return void
      */
     public function testGetStoreSingleSiteModelIds(bool $isObjectNew): void
     {
@@ -548,10 +539,7 @@ class ProductTest extends TestCase
         ];
     }
 
-    /**
-    * @return void
-    */
-    public function testGetStoreId(): void
+    public function testGetStoreId()
     {
         $this->model->setStoreId(3);
         $this->assertEquals(3, $this->model->getStoreId());
@@ -560,10 +548,7 @@ class ProductTest extends TestCase
         $this->assertEquals(5, $this->model->getStoreId());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetCategoryCollection(): void
+    public function testGetCategoryCollection()
     {
         $collection = $this->getMockBuilder(Collection::class)
             ->disableOriginalConstructor()
@@ -573,26 +558,26 @@ class ProductTest extends TestCase
     }
 
     /**
-     * @return void
      * @dataProvider getCategoryCollectionCollectionNullDataProvider
      */
-    public function testGetCategoryCollectionCollectionNull(
-        $initCategoryCollection,
-        $getIdResult,
-        $productIdCached
-    ): void {
+    public function testGetCategoryCollectionCollectionNull($initCategoryCollection, $getIdResult, $productIdCached)
+    {
         $product = $this->createPartialMock(
             \Magento\Catalog\Model\Product::class,
             [
                 '_getResource',
                 'setCategoryCollection',
-                'getId'
+                'getId',
             ]
         );
 
         $abstractDbMock = $this->getMockBuilder(AbstractDb::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getCategoryCollection'])
+            ->setMethods(
+                [
+                    'getCategoryCollection',
+                ]
+            )
             ->getMockForAbstractClass();
         $getCategoryCollectionMock = $this->createMock(
             Collection::class
@@ -634,20 +619,17 @@ class ProductTest extends TestCase
             [
                 '$initCategoryCollection' => null,
                 '$getIdResult' => 'getIdResult value',
-                '$productIdCached' => 'productIdCached value'
+                '$productIdCached' => 'productIdCached value',
             ],
             [
                 '$initCategoryCollection' => 'value',
                 '$getIdResult' => 'getIdResult value',
-                '$productIdCached' => 'not getIdResult value'
-            ]
+                '$productIdCached' => 'not getIdResult value',
+            ],
         ];
     }
 
-    /**
-    * @return void
-    */
-    public function testSetCategoryCollection(): void
+    public function testSetCategoryCollection()
     {
         $collection = $this->getMockBuilder(Collection::class)
             ->disableOriginalConstructor()
@@ -656,10 +638,7 @@ class ProductTest extends TestCase
         $this->assertSame($this->model->getCategoryCollection(), $this->model->getCategoryCollection());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetCategory(): void
+    public function testGetCategory()
     {
         $this->model->setData('category_ids', [10]);
         $this->category->expects($this->any())->method('getId')->willReturn(10);
@@ -668,69 +647,47 @@ class ProductTest extends TestCase
         $this->assertInstanceOf(Category::class, $this->model->getCategory());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetCategoryId(): void
+    public function testGetCategoryId()
     {
         $this->model->setData('category_ids', [10]);
         $this->category->expects($this->any())->method('getId')->willReturn(10);
 
-        $this->registry
-            ->method('registry')
-            ->willReturnOnConsecutiveCalls(null, $this->category);
+        $this->registry->expects($this->at(0))->method('registry');
+        $this->registry->expects($this->at(1))->method('registry')->willReturn($this->category);
         $this->assertFalse($this->model->getCategoryId());
         $this->assertEquals(10, $this->model->getCategoryId());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetIdBySku(): void
+    public function testGetIdBySku()
     {
         $this->resource->expects($this->once())->method('getIdBySku')->willReturn(5);
         $this->assertEquals(5, $this->model->getIdBySku('someSku'));
     }
 
-    /**
-    * @return void
-    */
-    public function testGetCategoryIds(): void
+    public function testGetCategoryIds()
     {
         $this->model->lockAttribute('category_ids');
         $this->assertEquals([], $this->model->getCategoryIds());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetStatusInitial(): void
+    public function testGetStatusInitial()
     {
         $this->assertEquals(Status::STATUS_ENABLED, $this->model->getStatus());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetStatus(): void
+    public function testGetStatus()
     {
         $this->model->setStatus(null);
         $this->assertEquals(Status::STATUS_ENABLED, $this->model->getStatus());
     }
 
-    /**
-     * @return void
-     */
-    public function testIsInStock(): void
+    public function testIsInStock()
     {
         $this->model->setStatus(Status::STATUS_ENABLED);
         $this->assertTrue($this->model->isInStock());
     }
 
-    /**
-     * @return void
-     */
-    public function testIndexerAfterDeleteCommitProduct(): void
+    public function testIndexerAfterDeleteCommitProduct()
     {
         $this->model->isDeleted(true);
         $this->categoryIndexerMock->expects($this->once())->method('reindexRow');
@@ -746,10 +703,9 @@ class ProductTest extends TestCase
      * @param $productFlatCount
      * @param $categoryIndexerCount
      *
-     * @return void
      * @dataProvider getProductReindexProvider
      */
-    public function testReindex($productChanged, $isScheduled, $productFlatCount, $categoryIndexerCount): void
+    public function testReindex($productChanged, $isScheduled, $productFlatCount, $categoryIndexerCount)
     {
         $this->model->setData('entity_id', 1);
         $this->_catalogProduct->expects($this->once())
@@ -781,10 +737,7 @@ class ProductTest extends TestCase
         ];
     }
 
-    /**
-    * @return void
-    */
-    public function testPriceReindexCallback(): void
+    public function testPriceReindexCallback()
     {
         $this->model = $this->objectManagerHelper->getObject(
             \Magento\Catalog\Model\Product::class,
@@ -805,14 +758,12 @@ class ProductTest extends TestCase
     }
 
     /**
+     * @dataProvider getIdentitiesProvider
      * @param array $expected
      * @param array|null $origData
      * @param array $data
      * @param bool $isDeleted
      * @param bool $isNew
-     *
-     * @return void
-     * @dataProvider getIdentitiesProvider
      */
     public function testGetIdentities(
         array $expected,
@@ -820,7 +771,7 @@ class ProductTest extends TestCase
         array $data,
         bool $isDeleted = false,
         bool $isNew = false
-    ): void {
+    ) {
         $this->model->setIdFieldName('id');
         if (is_array($origData)) {
             foreach ($origData as $key => $value) {
@@ -842,8 +793,7 @@ class ProductTest extends TestCase
     {
         $extensionAttributesMock = $this->getMockBuilder(ExtensionAttributesInterface::class)
             ->disableOriginalConstructor()
-            ->addMethods(['getStockItem'])
-            ->getMockForAbstractClass();
+            ->setMethods(['getStockItem'])->getMockForAbstractClass();
         $stockItemMock = $this->getMockBuilder(StockItemInterface::class)
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
@@ -854,7 +804,7 @@ class ProductTest extends TestCase
             'no changes' => [
                 ['cat_p_1'],
                 ['id' => 1, 'name' => 'value', 'category_ids' => [1]],
-                ['id' => 1, 'name' => 'value', 'category_ids' => [1]]
+                ['id' => 1, 'name' => 'value', 'category_ids' => [1]],
             ],
             'new product' => $this->getNewProductProviderData(),
             'new disabled product' => $this->getNewDisabledProductProviderData(),
@@ -868,7 +818,7 @@ class ProductTest extends TestCase
                     'status' => Status::STATUS_ENABLED,
                     'affected_category_ids' => [1, 2],
                     'is_changed_categories' => true
-                ]
+                ],
             ],
             'category change for disabled product' => [
                 [0 => 'cat_p_1'],
@@ -880,23 +830,23 @@ class ProductTest extends TestCase
                     'status' => Status::STATUS_DISABLED,
                     'affected_category_ids' => [1, 2],
                     'is_changed_categories' => true
-                ]
+                ],
             ],
             'status change to disabled' => [
                 [0 => 'cat_p_1', 1 => 'cat_c_p_7'],
                 ['id' => 1, 'name' => 'value', 'category_ids' => [7], 'status' => Status::STATUS_ENABLED],
-                ['id' => 1, 'name' => 'value', 'category_ids' => [7], 'status' => Status::STATUS_DISABLED]
+                ['id' => 1, 'name' => 'value', 'category_ids' => [7], 'status' => Status::STATUS_DISABLED],
             ],
             'status change to enabled' => [
                 [0 => 'cat_p_1', 1 => 'cat_c_p_7'],
                 ['id' => 1, 'name' => 'value', 'category_ids' => [7], 'status' => Status::STATUS_DISABLED],
-                ['id' => 1, 'name' => 'value', 'category_ids' => [7], 'status' => Status::STATUS_ENABLED]
+                ['id' => 1, 'name' => 'value', 'category_ids' => [7], 'status' => Status::STATUS_ENABLED],
             ],
             'status changed, category unassigned' => $this->getStatusAndCategoryChangesData(),
             'no status changes' => [
                 [0 => 'cat_p_1'],
                 ['id' => 1, 'name' => 'value', 'category_ids' => [1], 'status' => Status::STATUS_ENABLED],
-                ['id' => 1, 'name' => 'value', 'category_ids' => [1], 'status' => Status::STATUS_ENABLED]
+                ['id' => 1, 'name' => 'value', 'category_ids' => [1], 'status' => Status::STATUS_ENABLED],
             ],
             'no stock status changes' => $this->getNoStockStatusChangesData($extensionAttributesMock),
             'no stock status data 1' => [
@@ -907,8 +857,8 @@ class ProductTest extends TestCase
                     'name' => 'value',
                     'category_ids' => [1],
                     'status' => Status::STATUS_ENABLED,
-                    ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock
-                ]
+                    ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock,
+                ],
             ],
             'no stock status data 2' => [
                 [0 => 'cat_p_1'],
@@ -918,8 +868,8 @@ class ProductTest extends TestCase
                     'name' => 'value',
                     'category_ids' => [1],
                     'status' => Status::STATUS_ENABLED,
-                    'stock_data' => ['is_in_stock' => true]
-                ]
+                    'stock_data' => ['is_in_stock' => true],
+                ],
             ],
             'stock status changes for enabled product' => $this->getStatusStockProviderData($extensionAttributesMock),
             'stock status changes for disabled product' => [
@@ -931,9 +881,9 @@ class ProductTest extends TestCase
                     'category_ids' => [1],
                     'status' => Status::STATUS_DISABLED,
                     'stock_data' => ['is_in_stock' => false],
-                    ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock
-                ]
-            ]
+                    ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock,
+                ],
+            ],
         ];
     }
 
@@ -952,16 +902,15 @@ class ProductTest extends TestCase
                 'status' => Status::STATUS_ENABLED,
                 'is_changed_categories' => true,
                 'affected_category_ids' => [5]
-            ]
+            ],
         ];
     }
 
     /**
      * @param MockObject $extensionAttributesMock
-     *
      * @return array
      */
-    private function getNoStockStatusChangesData(MockObject $extensionAttributesMock): array
+    private function getNoStockStatusChangesData($extensionAttributesMock): array
     {
         return [
             [0 => 'cat_p_1'],
@@ -972,8 +921,8 @@ class ProductTest extends TestCase
                 'category_ids' => [1],
                 'status' => Status::STATUS_ENABLED,
                 'stock_data' => ['is_in_stock' => true],
-                ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock
-            ]
+                ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock,
+            ],
         ];
     }
 
@@ -993,7 +942,7 @@ class ProductTest extends TestCase
                 'is_changed_categories' => true
             ],
             false,
-            true
+            true,
         ];
     }
 
@@ -1014,16 +963,15 @@ class ProductTest extends TestCase
                 'is_changed_categories' => true
             ],
             false,
-            true
+            true,
         ];
     }
 
     /**
      * @param MockObject $extensionAttributesMock
-     *
      * @return array
      */
-    private function getStatusStockProviderData(MockObject $extensionAttributesMock): array
+    private function getStatusStockProviderData($extensionAttributesMock): array
     {
         return [
             [0 => 'cat_p_1', 1 => 'cat_c_p_1'],
@@ -1034,17 +982,15 @@ class ProductTest extends TestCase
                 'category_ids' => [1],
                 'status' => Status::STATUS_ENABLED,
                 'stock_data' => ['is_in_stock' => false],
-                ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock
-            ]
+                ExtensibleDataInterface::EXTENSION_ATTRIBUTES_KEY => $extensionAttributesMock,
+            ],
         ];
     }
 
     /**
-     * Test retrieving price Info.
-     *
-     * @return void
+     * Test retrieving price Info
      */
-    public function testGetPriceInfo(): void
+    public function testGetPriceInfo()
     {
         $this->productTypeInstanceMock->expects($this->once())
             ->method('getPriceInfo')
@@ -1054,11 +1000,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Test for set qty.
-     *
-     * @return void
+     * Test for set qty
      */
-    public function testSetQty(): void
+    public function testSetQty()
     {
         $this->productTypeInstanceMock->expects($this->exactly(2))
             ->method('getPriceInfo')
@@ -1075,11 +1019,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Test reload PriceInfo.
-     *
-     * @return void
+     * Test reload PriceInfo
      */
-    public function testReloadPriceInfo(): void
+    public function testReloadPriceInfo()
     {
         $this->productTypeInstanceMock->expects($this->exactly(2))
             ->method('getPriceInfo')
@@ -1090,22 +1032,18 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Test for get qty.
-     *
-     * @return void
+     * Test for get qty
      */
-    public function testGetQty(): void
+    public function testGetQty()
     {
         $this->model->setQty(1);
         $this->assertEquals(1, $this->model->getQty());
     }
 
     /**
-     *  Test for `save` method.
-     *
-     * @return void
+     *  Test for `save` method
      */
-    public function testSave(): void
+    public function testSave()
     {
         $collection = $this->createMock(Collection::class);
         $collection->method('count')->willReturn(1);
@@ -1118,11 +1056,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Image cache generation would not be performed if area was emulated.
-     *
-     * @return void
+     * Image cache generation would not be performed if area was emulated
      */
-    public function testSaveIfAreaEmulated(): void
+    public function testSaveIfAreaEmulated()
     {
         $this->appStateMock->expects($this->any())->method('isAreaCodeEmulated')->willReturn(true);
         $this->imageCache->expects($this->never())
@@ -1134,11 +1070,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     *  Test for `save` method for duplicated product.
-     *
-     * @return void
+     *  Test for `save` method for duplicated product
      */
-    public function testSaveAndDuplicate(): void
+    public function testSaveAndDuplicate()
     {
         $collection = $this->createMock(Collection::class);
         $collection->method('count')->willReturn(1);
@@ -1151,11 +1085,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Test for save method behavior with type options.
-     *
-     * @return void
+     * Test for save method behavior with type options
      */
-    public function testSaveWithoutTypeOptions(): void
+    public function testSaveWithoutTypeOptions()
     {
         $this->model->setCanSaveCustomOptions(false);
         $this->model->setTypeHasOptions(true);
@@ -1168,11 +1100,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Test for save method with provided options data.
-     *
-     * @return void
+     * Test for save method with provided options data
      */
-    public function testSaveWithProvidedRequiredOptions(): void
+    public function testSaveWithProvidedRequiredOptions()
     {
         $this->model->setData("has_options", "1");
         $this->model->setData("required_options", "1");
@@ -1185,10 +1115,8 @@ class ProductTest extends TestCase
 
     /**
      * Test for save method with provided options settled via magic method
-     *
-     * @return void
      */
-    public function testSaveWithProvidedRequiredOptionsValue(): void
+    public function testSaveWithProvidedRequiredOptionsValue()
     {
         $this->model->setHasOptions("1");
         $this->model->setRequiredOptions("1");
@@ -1200,10 +1128,7 @@ class ProductTest extends TestCase
         $this->assertTrue($this->model->getRequiredOptions());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetIsSalableSimple(): void
+    public function testGetIsSalableSimple()
     {
         $typeInstanceMock =
             $this->createPartialMock(Simple::class, ['isSalable']);
@@ -1217,10 +1142,7 @@ class ProductTest extends TestCase
         self::assertTrue($this->model->getIsSalable());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetIsSalableHasDataIsSaleable(): void
+    public function testGetIsSalableHasDataIsSaleable()
     {
         $typeInstanceMock = $this->createMock(Simple::class);
 
@@ -1232,15 +1154,13 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Configure environment for `testSave` and `testSaveAndDuplicate` methods.
-     *
-     * @return void
+     * Configure environment for `testSave` and `testSaveAndDuplicate` methods
      */
-    protected function configureSaveTest(): void
+    protected function configureSaveTest()
     {
         $productTypeMock = $this->getMockBuilder(Simple::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['beforeSave', 'save'])->getMock();
+            ->setMethods(['beforeSave', 'save'])->getMock();
         $productTypeMock->expects($this->once())->method('beforeSave')->willReturnSelf();
         $productTypeMock->expects($this->once())->method('save')->willReturnSelf();
 
@@ -1256,10 +1176,10 @@ class ProductTest extends TestCase
      *
      * @return void
      */
-    public function testFromArray(): void
+    public function testFromArray()
     {
         $data = [
-            'stock_item' => ['stock-item-data']
+            'stock_item' => ['stock-item-data'],
         ];
 
         $stockItemMock = $this->getMockForAbstractClass(
@@ -1287,10 +1207,7 @@ class ProductTest extends TestCase
         $this->assertEquals($this->model, $this->model->fromArray($data));
     }
 
-    /**
-    * @return void
-    */
-    protected function prepareCategoryIndexer(): void
+    protected function prepareCategoryIndexer()
     {
         $this->indexerRegistryMock->expects($this->once())
             ->method('get')
@@ -1299,11 +1216,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     *  Test for getProductLinks().
-     *
-     * @return void
+     *  Test for getProductLinks()
      */
-    public function testGetProductLinks(): void
+    public function testGetProductLinks()
     {
         $outputRelatedLink = $this->objectManagerHelper->getObject(Link::class);
         $outputRelatedLink->setSku("Simple Product 1");
@@ -1314,7 +1229,7 @@ class ProductTest extends TestCase
         $expectedOutput = [$outputRelatedLink];
         $this->productLinkRepositoryMock->expects($this->once())->method('getList')->willReturn($expectedOutput);
         $typeInstance = $this->getMockBuilder(AbstractType::class)
-            ->onlyMethods(['getSku'])
+            ->setMethods(['getSku'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $typeInstance->method('getSku')->willReturn('model');
@@ -1324,11 +1239,9 @@ class ProductTest extends TestCase
     }
 
     /**
-     *  Test for setProductLinks().
-     *
-     * @return void
+     *  Test for setProductLinks()
      */
-    public function testSetProductLinks(): void
+    public function testSetProductLinks()
     {
         $link = $this->objectManagerHelper->getObject(Link::class);
         $link->setSku("Simple Product 1");
@@ -1342,14 +1255,12 @@ class ProductTest extends TestCase
     }
 
     /**
-     * Set up two media attributes: image and small_image.
-     *
-     * @return void
+     * Set up two media attributes: image and small_image
      */
-    protected function setupMediaAttributes(): array
+    protected function setupMediaAttributes()
     {
         $productType = $this->getMockBuilder(AbstractType::class)
-            ->onlyMethods(['getSetAttributes'])
+            ->setMethods(['getSetAttributes'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $this->productTypeInstanceMock->expects($this->any())->method('factory')->willReturn(
@@ -1358,11 +1269,11 @@ class ProductTest extends TestCase
 
         $frontendMock = $this->getMockBuilder(AbstractFrontend::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getInputType'])
+            ->setMethods(['getInputType'])
             ->getMockForAbstractClass();
         $frontendMock->expects($this->any())->method('getInputType')->willReturn('media_image');
         $attributeImage = $this->getMockBuilder(AbstractAttribute::class)
-            ->onlyMethods(['getFrontend', 'getAttributeCode'])
+            ->setMethods(['getFrontend', 'getAttributeCode'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $attributeImage->expects($this->any())
@@ -1370,7 +1281,7 @@ class ProductTest extends TestCase
             ->willReturn($frontendMock);
         $attributeImage->expects($this->any())->method('getAttributeCode')->willReturn('image');
         $attributeSmallImage = $this->getMockBuilder(AbstractAttribute::class)
-            ->onlyMethods(['getFrontend', 'getAttributeCode'])
+            ->setMethods(['getFrontend', 'getAttributeCode'])
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
         $attributeSmallImage->expects($this->any())
@@ -1385,10 +1296,7 @@ class ProductTest extends TestCase
         return [$attributeImage, $attributeSmallImage];
     }
 
-    /**
-    * @return void
-    */
-    public function getMediaAttributes(): void
+    public function getMediaAttributes()
     {
         $expected = [];
         $mediaAttributes = $this->setupMediaAttributes();
@@ -1398,10 +1306,7 @@ class ProductTest extends TestCase
         $this->assertEquals($expected, $this->model->getMediaAttributes());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetMediaAttributeValues(): void
+    public function testGetMediaAttributeValues()
     {
         $this->mediaConfig->expects($this->once())->method('getMediaAttributeCodes')
             ->willReturn(['image', 'small_image']);
@@ -1415,18 +1320,12 @@ class ProductTest extends TestCase
         $this->assertEquals($expectedMediaAttributeValues, $this->model->getMediaAttributeValues());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetMediaGalleryEntriesNone(): void
+    public function testGetMediaGalleryEntriesNone()
     {
         $this->assertNull($this->model->getMediaGalleryEntries());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetMediaGalleryEntries(): void
+    public function testGetMediaGalleryEntries()
     {
         $this->setupMediaAttributes();
         $this->model->setData('image', 'imageFile.jpg');
@@ -1437,13 +1336,13 @@ class ProductTest extends TestCase
                 [
                     'value_id' => 1,
                     'file' => 'imageFile.jpg',
-                    'media_type' => 'image'
+                    'media_type' => 'image',
                 ],
                 [
                     'value_id' => 2,
                     'file' => 'smallImageFile.jpg',
-                    'media_type' => 'image'
-                ]
+                    'media_type' => 'image',
+                ],
             ]
         ];
         $this->model->setData('media_gallery', $mediaEntries);
@@ -1465,10 +1364,7 @@ class ProductTest extends TestCase
         $this->assertEquals([$entry1, $entry2], $this->model->getMediaGalleryEntries());
     }
 
-    /**
-    * @return void
-    */
-    public function testSetMediaGalleryEntries(): void
+    public function testSetMediaGalleryEntries()
     {
         $expectedResult = [
             'images' => [
@@ -1488,22 +1384,22 @@ class ProductTest extends TestCase
                     ],
                     'media_type' => 'image'
                 ]
-            ]
+            ],
         ];
 
         $entryMock = $this->getMockBuilder(ProductAttributeMediaGalleryEntryInterface::class)
-            ->onlyMethods(
+            ->setMethods(
                 [
                     'getId',
                     'getFile',
                     'getLabel',
                     'getPosition',
                     'isDisabled',
+                    'types',
                     'getContent',
                     'getMediaType'
                 ]
             )
-            ->addMethods(['types'])
             ->getMockForAbstractClass();
 
         $result = [
@@ -1529,10 +1425,7 @@ class ProductTest extends TestCase
         $this->assertEquals($expectedResult, $this->model->getMediaGallery());
     }
 
-    /**
-    * @return void
-    */
-    public function testGetMediaGalleryImagesMerging(): void
+    public function testGetMediaGalleryImagesMerging()
     {
         $mediaEntries =
             [
@@ -1540,17 +1433,17 @@ class ProductTest extends TestCase
                     [
                         'value_id' => 1,
                         'file' => 'imageFile.jpg',
-                        'media_type' => 'image'
+                        'media_type' => 'image',
                     ],
                     [
                         'value_id' => 3,
-                        'file' => 'imageFile.jpg'
+                        'file' => 'imageFile.jpg',
                     ],
                     [
                         'value_id' => 2,
                         'file' => 'smallImageFile.jpg',
-                        'media_type' => 'image'
-                    ]
+                        'media_type' => 'image',
+                    ],
                 ]
             ];
         $expectedImageDataObject = new DataObject(
@@ -1560,7 +1453,7 @@ class ProductTest extends TestCase
                 'media_type' => 'image',
                 'url' => 'http://magento.dev/pub/imageFile.jpg',
                 'id' => 1,
-                'path' => '/var/www/html/pub/imageFile.jpg'
+                'path' => '/var/www/html/pub/imageFile.jpg',
             ]
         );
         $expectedSmallImageDataObject = new DataObject(
@@ -1570,7 +1463,7 @@ class ProductTest extends TestCase
                 'media_type' => 'image',
                 'url' => 'http://magento.dev/pub/smallImageFile.jpg',
                 'id' => 2,
-                'path' => '/var/www/html/pub/smallImageFile.jpg'
+                'path' => '/var/www/html/pub/smallImageFile.jpg',
             ]
         );
 
@@ -1591,7 +1484,7 @@ class ProductTest extends TestCase
             [
                 [1, null],
                 [2, null],
-                [3, 'not_null_skeep_foreache']
+                [3, 'not_null_skeep_foreache'],
             ]
         );
         $imagesCollectionMock->expects(self::exactly(2))->method('addItem')
@@ -1604,10 +1497,7 @@ class ProductTest extends TestCase
         $this->model->getMediaGalleryImages();
     }
 
-    /**
-    * @return void
-    */
-    public function testGetCustomAttributes(): void
+    public function testGetCustomAttributes()
     {
         $priceCode = 'price';
         $customAttributeCode = 'color';
@@ -1658,20 +1548,17 @@ class ProductTest extends TestCase
         ];
     }
 
-    /**
-    * @return void
-    */
-    public function testGetOptions(): void
+    public function testGetOptions()
     {
         $option1Id = 2;
         $optionMock1 = $this->getMockBuilder(Option::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', 'setProduct'])
+            ->setMethods(['getId', 'setProduct'])
             ->getMock();
         $option2Id = 3;
         $optionMock2 = $this->getMockBuilder(Option::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getId', 'setProduct'])
+            ->setMethods(['getId', 'setProduct'])
             ->getMock();
         $expectedOptions = [
             $option1Id => $optionMock1,
@@ -1712,10 +1599,7 @@ class ProductTest extends TestCase
         return $reflectionProperty->getValue($object);
     }
 
-    /**
-    * @return void
-    */
-    public function testGetFinalPrice(): void
+    public function testGetFinalPrice()
     {
         $finalPrice = 11;
         $qty = 1;
@@ -1739,10 +1623,7 @@ class ProductTest extends TestCase
         $this->model->setFinalPrice(9.99);
     }
 
-    /**
-    * @return void
-    */
-    public function testGetFinalPricePreset(): void
+    public function testGetFinalPricePreset()
     {
         $finalPrice = 9.99;
         $qty = 1;
@@ -1765,10 +1646,7 @@ class ProductTest extends TestCase
         $this->assertEquals($finalPrice, $this->model->getFinalPrice($qty));
     }
 
-    /**
-    * @return void
-    */
-    public function testGetTypeId(): void
+    public function testGetTypeId()
     {
         $productType = $this->getMockBuilder(Virtual::class)
             ->disableOriginalConstructor()
@@ -1783,10 +1661,7 @@ class ProductTest extends TestCase
         $this->model->getTypeInstance();
     }
 
-    /**
-    * @return void
-    */
-    public function testGetOptionById(): void
+    public function testGetOptionById()
     {
         $optionId = 100;
         $optionMock = $this->createMock(Option::class);
@@ -1795,10 +1670,7 @@ class ProductTest extends TestCase
         $this->assertEquals($optionMock, $this->model->getOptionById($optionId));
     }
 
-    /**
-    * @return void
-    */
-    public function testGetOptionByIdWithWrongOptionId(): void
+    public function testGetOptionByIdWithWrongOptionId()
     {
         $optionId = 100;
         $optionMock = $this->createMock(Option::class);
@@ -1807,10 +1679,7 @@ class ProductTest extends TestCase
         $this->assertNull($this->model->getOptionById($optionId));
     }
 
-    /**
-    * @return void
-    */
-    public function testGetOptionByIdForProductWithoutOptions(): void
+    public function testGetOptionByIdForProductWithoutOptions()
     {
         $this->assertNull($this->model->getOptionById(100));
     }

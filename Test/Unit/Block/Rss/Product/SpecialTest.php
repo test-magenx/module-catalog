@@ -90,19 +90,14 @@ class SpecialTest extends TestCase
      */
     protected $request;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->request = $this->getMockForAbstractClass(RequestInterface::class);
-        $this->request
-            ->method('getParam')
-            ->withConsecutive(['store_id'], ['cid'])
-            ->willReturnOnConsecutiveCalls(null, null);
+        $this->request->expects($this->at(0))->method('getParam')->with('store_id')->willReturn(null);
+        $this->request->expects($this->at(1))->method('getParam')->with('cid')->willReturn(null);
 
         $this->httpContext = $this->getMockBuilder(Context::class)
-            ->onlyMethods(['getValue'])->disableOriginalConstructor()
+            ->setMethods(['getValue'])->disableOriginalConstructor()
             ->getMock();
         $this->httpContext->expects($this->any())->method('getValue')->willReturn(1);
 
@@ -115,8 +110,7 @@ class SpecialTest extends TestCase
 
         $this->storeManager = $this->getMockForAbstractClass(StoreManagerInterface::class);
         $store = $this->getMockBuilder(Store::class)
-            ->onlyMethods(['getId', 'getFrontendName'])
-            ->disableOriginalConstructor()
+            ->setMethods(['getId', 'getFrontendName'])->disableOriginalConstructor()
             ->getMock();
         $store->expects($this->any())->method('getId')->willReturn(1);
         $store->expects($this->any())->method('getFrontendName')->willReturn('Store 1');
@@ -141,15 +135,12 @@ class SpecialTest extends TestCase
                 'rssUrlBuilder' => $this->rssUrlBuilder,
                 'storeManager' => $this->storeManager,
                 'scopeConfig' => $this->scopeConfig,
-                'localeDate' => $this->localeDate
+                'localeDate' => $this->localeDate,
             ]
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testGetRssData(): void
+    public function testGetRssData()
     {
         $this->rssUrlBuilder->expects($this->once())->method('getUrl')
             ->with(['type' => 'special_products', 'store_id' => 1])
@@ -175,9 +166,9 @@ class SpecialTest extends TestCase
             'entries' => [
                 [
                     'title' => 'Product Name',
-                    'link' => 'http://magento.com/product-name.html'
-                ]
-            ]
+                    'link' => 'http://magento.com/product-name.html',
+                ],
+            ],
         ];
         $rssData = $this->block->getRssData();
         $description = $rssData['entries'][0]['description'];
@@ -197,29 +188,22 @@ class SpecialTest extends TestCase
     /**
      * @return MockObject
      */
-    protected function getItemMock(): MockObject
+    protected function getItemMock()
     {
         $item = $this->getMockBuilder(Product::class)
-            ->onlyMethods(
-                [
-                    '__sleep',
-                    'getName',
-                    'getProductUrl',
-                    'getSpecialToDate',
-                    'getSpecialPrice',
-                    'getFinalPrice',
-                    'getPrice'
-                ]
-            )
-            ->addMethods(
-                [
-                    'getDescription',
-                    'getAllowedInRss',
-                    'getAllowedPriceInRss',
-                    'getUseSpecial'
-                ]
-            )
-            ->disableOriginalConstructor()
+            ->setMethods([
+                '__sleep',
+                'getName',
+                'getProductUrl',
+                'getDescription',
+                'getAllowedInRss',
+                'getAllowedPriceInRss',
+                'getSpecialToDate',
+                'getSpecialPrice',
+                'getFinalPrice',
+                'getPrice',
+                'getUseSpecial',
+            ])->disableOriginalConstructor()
             ->getMock();
         $item->expects($this->once())->method('getAllowedInRss')->willReturn(true);
         $item->expects($this->any())->method('getSpecialToDate')->willReturn(date('Y-m-d'));
@@ -235,10 +219,7 @@ class SpecialTest extends TestCase
         return $item;
     }
 
-    /**
-     * @return void
-     */
-    public function testIsAllowed(): void
+    public function testIsAllowed()
     {
         $this->scopeConfig->expects($this->once())->method('isSetFlag')
             ->with('rss/catalog/special', ScopeInterface::SCOPE_STORE)
@@ -246,18 +227,12 @@ class SpecialTest extends TestCase
         $this->assertTrue($this->block->isAllowed());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetCacheLifetime(): void
+    public function testGetCacheLifetime()
     {
         $this->assertEquals(600, $this->block->getCacheLifetime());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetFeeds(): void
+    public function testGetFeeds()
     {
         $this->scopeConfig->expects($this->once())->method('isSetFlag')
             ->with('rss/catalog/special', ScopeInterface::SCOPE_STORE)
@@ -267,7 +242,7 @@ class SpecialTest extends TestCase
             ->willReturn('http://magento.com/rss/feed/index/type/special_products/store_id/1');
         $expected = [
             'label' => 'Special Products',
-            'link' => 'http://magento.com/rss/feed/index/type/special_products/store_id/1'
+            'link' => 'http://magento.com/rss/feed/index/type/special_products/store_id/1',
         ];
         $this->assertEquals($expected, $this->block->getFeeds());
     }

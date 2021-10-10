@@ -65,35 +65,32 @@ class AttributeValidationTest extends TestCase
      */
     private $entityMock;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $objectManager = new ObjectManager($this);
 
         $this->attributeMock = $this->getMockBuilder(AbstractBackend::class)
-            ->addMethods(['getAttributeCode'])
+            ->setMethods(['getAttributeCode'])
             ->getMockForAbstractClass();
         $this->subjectMock = $this->getMockBuilder(AbstractBackend::class)
-            ->onlyMethods(['getAttribute'])
+            ->setMethods(['getAttribute'])
             ->getMockForAbstractClass();
         $this->subjectMock->expects($this->any())
             ->method('getAttribute')
             ->willReturn($this->attributeMock);
 
         $this->storeMock = $this->getMockBuilder(StoreInterface::class)
-            ->onlyMethods(['getId'])
+            ->setMethods(['getId'])
             ->getMockForAbstractClass();
         $this->storeManagerMock = $this->getMockBuilder(StoreManagerInterface::class)
-            ->onlyMethods(['getStore'])
+            ->setMethods(['getStore'])
             ->getMockForAbstractClass();
         $this->storeManagerMock->expects($this->any())
             ->method('getStore')
             ->willReturn($this->storeMock);
 
         $this->entityMock = $this->getMockBuilder(DataObject::class)
-            ->onlyMethods(['getData'])
+            ->setMethods(['getData'])
             ->getMock();
 
         $this->allowedEntityTypes = [$this->entityMock];
@@ -106,7 +103,7 @@ class AttributeValidationTest extends TestCase
             AttributeValidation::class,
             [
                 'storeManager' => $this->storeManagerMock,
-                'allowedEntityTypes' => $this->allowedEntityTypes
+                'allowedEntityTypes' => $this->allowedEntityTypes,
             ]
         );
     }
@@ -115,12 +112,11 @@ class AttributeValidationTest extends TestCase
      * @param bool $shouldProceedRun
      * @param bool $defaultStoreUsed
      * @param null|int|string $storeId
-     *
-     * @return void
-     * @throws NoSuchEntityException
      * @dataProvider aroundValidateDataProvider
+     * @throws NoSuchEntityException
+     * @return void
      */
-    public function testAroundValidate(bool $shouldProceedRun, bool $defaultStoreUsed, $storeId): void
+    public function testAroundValidate(bool $shouldProceedRun, bool $defaultStoreUsed, $storeId)
     {
         $this->isProceedMockCalled = false;
         $attributeCode = 'code';
@@ -128,15 +124,17 @@ class AttributeValidationTest extends TestCase
         $this->storeMock->expects($this->once())
             ->method('getId')
             ->willReturn($storeId);
-
         if ($defaultStoreUsed) {
             $this->attributeMock->expects($this->once())
                 ->method('getAttributeCode')
                 ->willReturn($attributeCode);
-            $this->entityMock
+            $this->entityMock->expects($this->at(0))
                 ->method('getData')
-                ->withConsecutive([], [$attributeCode])
-                ->willReturnOnConsecutiveCalls([$attributeCode => null], null);
+                ->willReturn([$attributeCode => null]);
+            $this->entityMock->expects($this->at(1))
+                ->method('getData')
+                ->with($attributeCode)
+                ->willReturn(null);
         }
 
         $this->attributeValidation->aroundValidate($this->subjectMock, $this->proceedMock, $this->entityMock);
@@ -144,8 +142,7 @@ class AttributeValidationTest extends TestCase
     }
 
     /**
-     * Data provider for testAroundValidate.
-     *
+     * Data provider for testAroundValidate
      * @return array
      */
     public function aroundValidateDataProvider(): array
@@ -154,7 +151,7 @@ class AttributeValidationTest extends TestCase
             [true, false, '0'],
             [true, false, 0],
             [true, false, null],
-            [false, true, 1]
+            [false, true, 1],
         ];
     }
 }

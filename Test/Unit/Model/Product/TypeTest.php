@@ -11,14 +11,12 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Type;
 use Magento\Catalog\Model\Product\Type\Pool;
 use Magento\Catalog\Model\Product\Type\Price;
-use Magento\Catalog\Model\Product\Type\Price\Factory as PriceFactory;
 use Magento\Catalog\Model\Product\Type\Simple;
 use Magento\Catalog\Model\Product\Type\Virtual;
 use Magento\Catalog\Model\ProductTypes\ConfigInterface;
 use Magento\Framework\Pricing\PriceInfo\Factory;
 use Magento\Framework\Pricing\PriceInfoInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -43,9 +41,9 @@ class TypeTest extends TestCase
             'label' => 'label_3',
             'model' => 'some_model',
             'composite' => 'some_type',
-            'price_model' => 'some_model'
+            'price_model' => 'some_model',
         ],
-        'simple' => ['label' => 'label_4', 'composite' => false]
+        'simple' => ['label' => 'label_4', 'composite' => false],
     ];
 
     /**
@@ -53,11 +51,7 @@ class TypeTest extends TestCase
      */
     protected $_model;
 
-    /**
-     * @return void
-     * @throws \ReflectionException
-     */
-    public function testGetTypes(): void
+    public function testGetTypes()
     {
         $property = new \ReflectionProperty($this->_model, '_types');
         $property->setAccessible(true);
@@ -65,18 +59,12 @@ class TypeTest extends TestCase
         $this->assertEquals($this->_productTypes, $this->_model->getTypes());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetOptionArray(): void
+    public function testGetOptionArray()
     {
         $this->assertEquals($this->getOptionArray(), $this->_model->getOptionArray());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetAllOptions(): void
+    public function testGetAllOptions()
     {
         $res[] = ['value' => '', 'label' => ''];
         foreach ($this->getOptionArray() as $index => $value) {
@@ -85,10 +73,7 @@ class TypeTest extends TestCase
         $this->assertEquals($res, $this->_model->getAllOptions());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetOptions(): void
+    public function testGetOptions()
     {
         $res = [];
         foreach ($this->getOptionArray() as $index => $value) {
@@ -97,20 +82,14 @@ class TypeTest extends TestCase
         $this->assertEquals($res, $this->_model->getOptions());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetAllOption(): void
+    public function testGetAllOption()
     {
         $options = $this->getOptionArray();
         array_unshift($options, ['value' => '', 'label' => '']);
         $this->assertEquals($options, $this->_model->getAllOption());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetOptionText(): void
+    public function testGetOptionText()
     {
         $options = $this->getOptionArray();
         $this->assertEquals($options['type_id_3'], $this->_model->getOptionText('type_id_3'));
@@ -119,10 +98,7 @@ class TypeTest extends TestCase
         $this->assertNull($this->_model->getOptionText('not_exist'));
     }
 
-    /**
-     * @return void
-     */
-    public function testGetCompositeTypes(): void
+    public function testGetCompositeTypes()
     {
         $property = new \ReflectionProperty($this->_model, '_compositeTypes');
         $property->setAccessible(true);
@@ -131,10 +107,7 @@ class TypeTest extends TestCase
         $this->assertEquals(['type_id_3'], $this->_model->getCompositeTypes());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetTypesByPriority(): void
+    public function testGetTypesByPriority()
     {
         $expected = [];
         foreach ($this->_productTypes as $typeId => $type) {
@@ -150,26 +123,23 @@ class TypeTest extends TestCase
         $this->assertEquals($expected, $this->_model->getTypesByPriority());
     }
 
-    /**
-     * @return void
-     */
-    public function testGetPriceInfo(): void
+    public function testGetPriceInfo()
     {
         $mockedProduct = $this->getMockedProduct();
         $expectedResult = PriceInfoInterface::class;
         $this->assertInstanceOf($expectedResult, $this->_model->getPriceInfo($mockedProduct));
     }
 
-    /**
-     * @return void
-     */
-    public function testFactory(): void
+    public function testFactory()
     {
         $mockedProduct = $this->getMockedProduct();
 
-        $mockedProduct
+        $mockedProduct->expects($this->at(0))
             ->method('getTypeId')
-            ->willReturnOnConsecutiveCalls('type_id_1', 'type_id_3');
+            ->willReturn('type_id_1');
+        $mockedProduct->expects($this->at(1))
+            ->method('getTypeId')
+            ->willReturn('type_id_3');
 
         $this->assertInstanceOf(
             Simple::class,
@@ -181,10 +151,7 @@ class TypeTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testPriceFactory(): void
+    public function testPriceFactory()
     {
         $this->assertInstanceOf(
             Price::class,
@@ -192,9 +159,6 @@ class TypeTest extends TestCase
         );
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->_objectHelper = new ObjectManager($this);
@@ -217,7 +181,7 @@ class TypeTest extends TestCase
     /**
      * @return array
      */
-    protected function getOptionArray(): array
+    protected function getOptionArray()
     {
         $options = [];
         foreach ($this->_productTypes as $typeId => $type) {
@@ -227,9 +191,9 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return Product|MockObject
+     * @return \Magento\Catalog\Model\Product
      */
-    private function getMockedProduct(): Product
+    private function getMockedProduct()
     {
         $mockBuilder = $this->getMockBuilder(Product::class)
             ->disableOriginalConstructor();
@@ -239,15 +203,15 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return Factory|MockObject
+     * @return Factory
      */
-    private function getMockedPriceInfoFactory(): Factory
+    private function getMockedPriceInfoFactory()
     {
         $mockedPriceInfoInterface = $this->getMockedPriceInfoInterface();
 
         $mockBuilder = $this->getMockBuilder(Factory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create']);
+            ->setMethods(['create']);
         $mock = $mockBuilder->getMock();
 
         $mock->expects($this->any())
@@ -258,9 +222,9 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return PriceInfoInterface|MockObject
+     * @return \Magento\Framework\Pricing\PriceInfoInterface
      */
-    private function getMockedPriceInfoInterface(): PriceInfoInterface
+    private function getMockedPriceInfoInterface()
     {
         $mockBuilder = $this->getMockBuilder(PriceInfoInterface::class)
             ->disableOriginalConstructor();
@@ -270,13 +234,13 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return Pool|MockObject
+     * @return Pool
      */
-    private function getMockedProductTypePool(): Pool
+    private function getMockedProductTypePool()
     {
         $mockBuild = $this->getMockBuilder(Pool::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['get']);
+            ->setMethods(['get']);
         $mock = $mockBuild->getMock();
 
         $mock->expects($this->any())
@@ -284,7 +248,7 @@ class TypeTest extends TestCase
             ->willReturnMap(
                 [
                     ['some_model', [], $this->getMockedProductTypeVirtual()],
-                    [Simple::class, [], $this->getMockedProductTypeSimple()]
+                    [Simple::class, [], $this->getMockedProductTypeSimple()],
                 ]
             );
 
@@ -292,13 +256,13 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return Virtual|MockObject
+     * @return Virtual
      */
-    private function getMockedProductTypeVirtual(): Virtual
+    private function getMockedProductTypeVirtual()
     {
         $mockBuilder = $this->getMockBuilder(Virtual::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['setConfig']);
+            ->setMethods(['setConfig']);
         $mock = $mockBuilder->getMock();
 
         $mock->expects($this->any())
@@ -308,13 +272,13 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return Simple|MockObject
+     * @return Simple
      */
-    private function getMockedProductTypeSimple(): Simple
+    private function getMockedProductTypeSimple()
     {
         $mockBuilder = $this->getMockBuilder(Simple::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['setConfig']);
+            ->setMethods(['setConfig']);
         $mock = $mockBuilder->getMock();
 
         $mock->expects($this->any())
@@ -324,13 +288,13 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return ConfigInterface|MockObject
+     * @return ConfigInterface
      */
-    private function getMockedConfig(): ConfigInterface
+    private function getMockedConfig()
     {
         $mockBuild = $this->getMockBuilder(ConfigInterface::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['getAll']);
+            ->setMethods(['getAll']);
         $mock = $mockBuild->getMockForAbstractClass();
 
         $mock->expects($this->any())
@@ -341,13 +305,13 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return PriceFactory|MockObject
+     * @return \Magento\Catalog\Model\Product\Type\Price\Factory
      */
-    private function getMockedTypePriceFactory(): PriceFactory
+    private function getMockedTypePriceFactory()
     {
         $mockBuild = $this->getMockBuilder(\Magento\Catalog\Model\Product\Type\Price\Factory::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['create']);
+            ->setMethods(['create']);
         $mock = $mockBuild->getMockForAbstractClass();
 
         $mock->expects($this->any())
@@ -355,7 +319,7 @@ class TypeTest extends TestCase
             ->willReturnMap(
                 [
                     ['some_model', [], $this->getMockedProductTypePrice()],
-                    [Price::class, [], $this->getMockedProductTypePrice()]
+                    [Price::class, [], $this->getMockedProductTypePrice()],
                 ]
             );
 
@@ -363,9 +327,9 @@ class TypeTest extends TestCase
     }
 
     /**
-     * @return Price|MockObject
+     * @return Price
      */
-    private function getMockedProductTypePrice(): Price
+    private function getMockedProductTypePrice()
     {
         $mockBuild = $this->getMockBuilder(Price::class)
             ->disableOriginalConstructor();

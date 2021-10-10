@@ -45,9 +45,6 @@ class SynchronizeTest extends TestCase
      */
     private $jsonFactoryMock;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->contextMock = $this->getMockBuilder(Context::class)
@@ -75,10 +72,7 @@ class SynchronizeTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteAction(): void
+    public function testExecuteAction()
     {
         $data = [
             'type_id' => null,
@@ -93,10 +87,15 @@ class SynchronizeTest extends TestCase
             ->method('create')
             ->willReturn($jsonObject);
 
-        $this->requestMock
+        $this->requestMock->expects($this->at(0))
             ->method('getParam')
-            ->withConsecutive(['ids', []], ['type_id', null])
-            ->willReturnOnConsecutiveCalls($data['ids'], $data['type_id']);
+            ->with('ids', [])
+            ->willReturn($data['ids']);
+
+        $this->requestMock->expects($this->at(1))
+            ->method('getParam')
+            ->with('type_id', null)
+            ->willReturn($data['type_id']);
 
         $this->synchronizerMock->expects($this->once())
             ->method('syncActions')
@@ -109,10 +108,7 @@ class SynchronizeTest extends TestCase
         $this->synchronize->execute();
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteActionException(): void
+    public function testExecuteActionException()
     {
         $data = [
             'type_id' => null,
@@ -126,10 +122,15 @@ class SynchronizeTest extends TestCase
             ->method('create')
             ->willReturn($jsonObject);
 
-        $this->requestMock
+        $this->requestMock->expects($this->at(0))
             ->method('getParam')
-            ->withConsecutive(['ids', []], ['type_id', null])
-            ->willReturnOnConsecutiveCalls($data['ids'], $data['type_id']);
+            ->with('ids', [])
+            ->willReturn($data['ids']);
+
+        $this->requestMock->expects($this->at(1))
+            ->method('getParam')
+            ->with('type_id', null)
+            ->willReturn($data['type_id']);
 
         $this->synchronizerMock->expects($this->once())
             ->method('syncActions')

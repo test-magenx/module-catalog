@@ -51,9 +51,6 @@ class ProductTest extends TestCase
      */
     protected $cacheContextMock;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $this->fullMock = $this->createPartialMock(
@@ -97,10 +94,7 @@ class ProductTest extends TestCase
         $cacheContextProperty->setValue($this->model, $this->cacheContextMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteWithIndexerWorking(): void
+    public function testExecuteWithIndexerWorking()
     {
         $ids = [1, 2, 3];
 
@@ -110,20 +104,14 @@ class ProductTest extends TestCase
             Rows::class,
             ['execute']
         );
-        $rowMock
-            ->method('execute')
-            ->with($ids)
-            ->willReturn($rowMock);
+        $rowMock->expects($this->at(0))->method('execute')->with($ids)->willReturnSelf();
 
         $this->rowsMock->expects($this->once())->method('create')->willReturn($rowMock);
 
         $this->model->execute($ids);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteWithIndexerNotWorking(): void
+    public function testExecuteWithIndexerNotWorking()
     {
         $ids = [1, 2, 3];
 
@@ -144,10 +132,7 @@ class ProductTest extends TestCase
         $this->model->execute($ids);
     }
 
-    /**
-     * @return void
-     */
-    protected function prepareIndexer(): void
+    protected function prepareIndexer()
     {
         $this->indexerRegistryMock->expects($this->any())
             ->method('get')
@@ -155,10 +140,7 @@ class ProductTest extends TestCase
             ->willReturn($this->indexerMock);
     }
 
-    /**
-     * @return void
-     */
-    public function testExecuteFull(): void
+    public function testExecuteFull()
     {
         /** @var Full $productIndexerFlatFull */
         $productIndexerFlatFull = $this->createMock(Full::class);

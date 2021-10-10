@@ -82,9 +82,9 @@ class SaveTest extends TestCase
     private $save;
 
     /**
-     * Set up.
+     * Set up
      *
-     * @inheritdoc
+     * @return void
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function setUp(): void
@@ -144,17 +144,17 @@ class SaveTest extends TestCase
     }
 
     /**
-     * Run test execute method.
+     * Run test execute method
      *
      * @param int|bool $categoryId
      * @param int $storeId
      * @param int|null $parentId
-     *
      * @return void
+     *
      * @dataProvider dataProviderExecute
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function testExecute($categoryId, $storeId, $parentId): void
+    public function testExecute($categoryId, $storeId, $parentId)
     {
         $this->markTestSkipped('Due to MAGETWO-48956');
 
@@ -407,7 +407,9 @@ class SaveTest extends TestCase
         $this->messageManagerMock->expects($this->once())
             ->method('addSuccessMessage')
             ->with(__('You saved the category.'));
-        $categoryMock->method('getId')->willReturn(111);
+        $categoryMock->expects($this->at(1))
+            ->method('getId')
+            ->willReturn(111);
         $this->layoutFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($layoutMock);
@@ -447,22 +449,22 @@ class SaveTest extends TestCase
     }
 
     /**
-     * Data provider for execute.
+     * Data provider for execute
      *
      * @return array
      */
-    public function dataProviderExecute(): array
+    public function dataProviderExecute()
     {
         return [
             [
                 'categoryId' => false,
                 'storeId' => 7,
-                'parentId' => 123
+                'parentId' => 123,
             ],
             [
                 'categoryId' => false,
                 'storeId' => 7,
-                'parentId' => null
+                'parentId' => null,
             ]
         ];
     }
@@ -470,7 +472,7 @@ class SaveTest extends TestCase
     /**
      * @return array
      */
-    public function imagePreprocessingDataProvider(): array
+    public function imagePreprocessingDataProvider()
     {
         $dataWithImage = [
             'image' => 'path.jpg',
@@ -500,7 +502,7 @@ class SaveTest extends TestCase
      * @param array $data
      * @param array $expected
      */
-    public function testImagePreprocessing($data, $expected): void
+    public function testImagePreprocessing($data, $expected)
     {
         $eavConfig = $this->createPartialMock(\Magento\Eav\Model\Config::class, ['getEntityType']);
 

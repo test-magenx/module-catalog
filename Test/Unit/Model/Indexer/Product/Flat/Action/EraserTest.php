@@ -40,9 +40,6 @@ class EraserTest extends TestCase
      */
     protected $model;
 
-    /**
-     * @inheritDoc
-     */
     protected function setUp(): void
     {
         $resource = $this->createMock(ResourceConnection::class);
@@ -63,10 +60,7 @@ class EraserTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
-    public function testRemoveDeletedProducts(): void
+    public function testRemoveDeletedProducts()
     {
         $productsToDeleteIds = [1, 2];
         $select = $this->createMock(Select::class);
@@ -89,10 +83,7 @@ class EraserTest extends TestCase
         $this->model->removeDeletedProducts($productsToDeleteIds, 1);
     }
 
-    /**
-     * @return void
-     */
-    public function testDeleteProductsFromStoreForAllStores(): void
+    public function testDeleteProductsFromStoreForAllStores()
     {
         $store1 = $this->createMock(Store::class);
         $store1->expects($this->any())->method('getId')->willReturn(1);
@@ -100,12 +91,10 @@ class EraserTest extends TestCase
         $store2->expects($this->any())->method('getId')->willReturn(2);
         $this->storeManager->expects($this->once())->method('getStores')
             ->willReturn([$store1, $store2]);
-        $this->connection
-            ->method('delete')
-            ->withConsecutive(
-                ['store_1_flat', ['entity_id IN(?)' => [1]]],
-                ['store_2_flat', ['entity_id IN(?)' => [1]]]
-            );
+        $this->connection->expects($this->at(0))->method('delete')
+            ->with('store_1_flat', ['entity_id IN(?)' => [1]]);
+        $this->connection->expects($this->at(1))->method('delete')
+            ->with('store_2_flat', ['entity_id IN(?)' => [1]]);
 
         $this->model->deleteProductsFromStore(1);
     }
